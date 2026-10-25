@@ -1,0 +1,74 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M003-S01",
+  "round": 2,
+  "title": "Implement durable typed events and explicit recovery",
+  "objective": "Deliver the separate Rust library and CLI metadata path specified in native-core-plan.md, proving durable intent, ownership and recovery.",
+  "acceptance": [
+    "Implement all metadata, persistence, ownership, recovery and CLI contracts in 02_analysis/native-core-plan.md; use closed bounded versioned types and no raw payload maps.",
+    "Pin Rust 1.99.1, rusqlite 0.40.0 with bundled SQLite 3.53.1, serde 1.0.228 and serde_json 1.0.154; track root lockfile and exclude the canary from the product workspace.",
+    "Prove immutable transactional append, parent/scope validation, identical replay no-op and conflicting duplicate refusal without writes; reject unsupported schema versions safely.",
+    "Prove committed-before-return intents, crash before and after commit, explicit attributed recovery, active-session protection, repeatable reconciliation and linked late results using fresh processes.",
+    "Race two processes for one session claim and observe exactly one owner; no implicit expiry or takeover. Completion requires all current required checks plus explicit acceptance.",
+    "Preserve every physical attempt, predecessor/repair link, failure, selected versus observed identity and unknown cost/usage component for later honest accounting.",
+    "Reject sensitive or raw input before persistence without echoing it; verify synthetic sensitive values absent from database/WAL and stdout/stderr.",
+    "Exercise actual built CLI init, bounded JSON append/show and reconcile across process boundaries, including failed tool result and verification/acceptance; document usable examples.",
+    "Full verifier materializes once and executes canary plus product offline with fmt, Clippy, build and nonempty required discovered/executed tests; fail on missing/skipped tests and retain candidate identities and source/index/HEAD invariance.",
+    "Record portable observations and historical receipt references in 02_analysis/native-core-results.md; make no packaging, adapter, routing or G1-G6 completion claim."
+  ],
+  "non_goals": [
+    "Model/tool dispatch, inventory ranking, providers, harness hooks, packaging or installation.",
+    "Rewriting accepted canary evidence, importing the community harness or adding unapproved direct dependencies."
+  ],
+  "read_first": [
+    "08_pkg/CONTEXT.md",
+    "07_app/CONTEXT.md",
+    "02_analysis/CONTEXT.md",
+    "00_brief/decisions.md",
+    "00_brief/release-contract.md",
+    "02_analysis/native-core-plan.md",
+    "02_analysis/foundation-contract.md",
+    "scripts/canary_verify.py",
+    "scripts/hermetic_verification.py",
+    "docs/project_checks.md"
+  ],
+  "allowed_prefixes": [
+    "08_pkg/relayforge-core/",
+    "07_app/relayforge-cli/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "rust-toolchain.toml",
+    "scripts/product_verify.py",
+    "scripts/canary_verify.py",
+    "02_analysis/native-core-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/product_verify.py",
+      "--focused"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Previous verification failed. Complete receipt: `05_governance/reviews/m003/M003-S01_r1_verification.json` (sha256 `25d6b66ac0de22ac56a6bc6bd8c59fe2e2ad5d97ec9806dc7395b98d66be4e8b`)\n\nstdout tail:\n```text\nroadmap: ok\r\nledger: ok\r\nCANDIDATE TREE 17c76fbb1684733ad89eed8da64f2f1d07d4c8e3 files=186\r\nCANDIDATE CLEAN PASS: tree=17c76fbb1684733ad89eed8da64f2f1d07d4c8e3; private baseline=ac2d515726dabddfd07e3824401b40c8dab5edda; scratch-only metadata/index/objects\r\nCOMMAND <absolute-path>\r\nEXIT 2: <absolute-path>\r\nroadmap: ok\r\n\n```\n\nstderr tail:\n```text\nwarning: M002-S02: slice entry exceeds 2 KB\r\nwarning: M003-S01: slice entry exceeds 2 KB\r\nwarning: M002-S02: slice entry exceeds 2 KB\r\nwarning: M003-S01: slice entry exceeds 2 KB\r\nerror: more than one pending commit operation\r\nverification command 2 failed: argv=['<absolute-path>', '-B', 'scripts/ledger.py', 'check'] cwd=<absolute-path> exit=2\r\nproduct verification failed: command failed with exit 2: <absolute-path>\r\nverification command 5 failed: argv=['<absolute-path>', '-B', 'scripts/product_verify.py'] cwd=<repo> exit=1\r\n\n```",
+  "memory": ""
+}

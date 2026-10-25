@@ -624,6 +624,16 @@ def _candidate_run(
     if not manifest:
         raise VerificationError("candidate tree has no files")
     product_paths = (
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "08_pkg/relayforge-core/Cargo.toml",
+        "08_pkg/relayforge-core/src/lib.rs",
+        "08_pkg/relayforge-core/tests/storage_contract.rs",
+        "07_app/relayforge-cli/Cargo.toml",
+        "07_app/relayforge-cli/src/main.rs",
+        "scripts/product_verify.py",
+        "02_analysis/native-core-results.md",
         "02_analysis/canary-results.md",
         "08_pkg/canary/Cargo.lock",
         "08_pkg/canary/Cargo.toml",
@@ -688,11 +698,25 @@ def _candidate_run(
         }
     )
     baseline_commit = _git(
-        ["commit-tree", tree, "-m", "RelayForge isolated canary baseline"],
+        ["commit-tree", tree, "-p", before_head, "-m", "RelayForge isolated canary baseline"],
         root=source,
         env=candidate_env,
         deadline=deadline,
     ).stdout.strip()
+    baseline_parents = _git(
+        ["rev-list", "--parents", "-n", "1", baseline_commit],
+        root=source,
+        env=candidate_env,
+        deadline=deadline,
+    ).stdout.split()
+    if baseline_parents != [baseline_commit, before_head]:
+        raise VerificationError("private Git baseline does not preserve the original HEAD parent")
+    _git(
+        ["merge-base", "--is-ancestor", before_head, baseline_commit],
+        root=source,
+        env=candidate_env,
+        deadline=deadline,
+    )
     _git(["update-ref", "HEAD", baseline_commit], root=source, env=candidate_env, deadline=deadline)
     _git(["read-tree", tree], root=source, env=candidate_env, deadline=deadline)
     baseline_tree = _git(
@@ -713,6 +737,14 @@ def _candidate_run(
             "PYTHONDONTWRITEBYTECODE": "1",
         }
     )
+    _run(
+        [sys.executable, "-B", "scripts/ledger.py", "check"],
+        cwd=source,
+        env=candidate_env,
+        deadline=deadline,
+        scratch=scratch,
+    )
+    print("PRIVATE CANDIDATE LEDGER CHECK PASS: original Git ancestry is visible", flush=True)
     untracked = _git(
         ["ls-files", "--others", "--exclude-standard", "-z"],
         root=source,
@@ -774,6 +806,12 @@ def _candidate_run(
         raise VerificationError("full verification changed HEAD")
     print("SOURCE/INDEX/HEAD ASSERTION PASS: unchanged by clean-candidate full verifier", flush=True)
     print(f"CANDIDATE SNAPSHOT SUMMARY: tree={tree}; blobs={snapshot_summary}", flush=True)
+    product_blobs = "; ".join(
+        f"{path}={blob_ids[path]}"
+        for path in product_paths
+        if path.startswith(("08_pkg/relayforge-core/", "07_app/relayforge-cli/", "scripts/product_verify.py"))
+    )
+    print(f"PRODUCT SNAPSHOT SUMMARY: {product_blobs}", flush=True)
 
 
 

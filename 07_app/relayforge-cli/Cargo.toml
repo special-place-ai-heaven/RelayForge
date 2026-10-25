@@ -1,0 +1,15 @@
+[package]
+name = "relayforge-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "relayforge"
+path = "src/main.rs"
+
+[dependencies]
+relayforge-core = { path = "../../08_pkg/relayforge-core" }
+rusqlite.workspace = true
+serde_json.workspace = true
