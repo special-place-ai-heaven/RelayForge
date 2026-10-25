@@ -16,3 +16,14 @@ Do not use this file as slice state or a substitute for `roadmap.yaml`.
 | M004-S04-ENV-001 | P2 | closed_by_review | 05_governance/reviews/m004/M004-S04_r1_review.md (b38d809d3aea89a5ffc555115c0869fecbfb96c7223d16e9276fc9e1ca37c7f5) | `scripts/ci_contract_check.py:79-81, 167-171`: validation checks only job-level wrapper values. A read-only probe added `RUSTC_WRAPPER=sccache` to the Windows full-verification step's environment; `validate` accepted it, allowing a step-level override to restore the observed failure. Reject nonempty wrapper values in every step environment and add a fixture. |
 | M004-S02-DOC-001 | P2 | closed_by_review | 05_governance/reviews/m004/M004_holistic_review.md (965eaae0731c26700691e0380680a225be2569362a740ff05d0e17b5db0b858f) | `docs/ci.md:53-66` still says S02 must record a new run and remote Linux qualification is pending. The S02 handoff records run 40213004003 passing Windows and all five Linux stages. Update the current CI status documentation with that qualification while retaining the failed-run history and Q001 gate. |
 <!-- findings:end -->
+
+- Workflow follow-up: historical resolution authority currently pins the entire
+  live `00_brief/decisions.md` file. Appending a proposed admission decision after
+  M004 failed `ledger.py check` with `resolved M004-S02: immutable evidence drift`;
+  restoring the exact original bytes passed. M005 needs no new authority beyond
+  D009/D015, so its admission stays in roadmap.yaml. Before a genuinely new
+  decision is required, qualify a historical-authority snapshot/reference solution
+  without rewriting ledger bytes or weakening evidence checks. The same live-path
+  pinning affected the original CI blocker document; subsequent evidence is kept
+  in new immutable handoff notes. This is workflow infrastructure, not a native
+  product defect; do not silently change old hashes to evade it.
