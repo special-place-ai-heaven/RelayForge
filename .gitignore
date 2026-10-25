@@ -22,9 +22,35 @@ venv/
 env/
 node_modules/
 
+# Rust build output at any workspace depth. Keep Cargo.lock, Cargo.toml,
+# rust-toolchain.toml and .cargo/config.toml tracked for reproducible builds.
+target/
+*.rs.bk
+*.profraw
+*.profdata
+
+# Local SQLite stores and their transaction sidecars. Sanitized database
+# fixtures, if required, need an explicit narrow exception reviewed with the test.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
 # Secrets and machine-local material
 .env
 .env.*
+# Only sanitized templates belong in Git; never put real values in these files.
+!.env.example
+!.env.sample
+!.env.template
 *.pem
 *.key
 *.secret
@@ -50,6 +76,9 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+.claude/settings.local.json
+*.swp
+*.swo
 
 # Enable these only when roadmap.yaml declares the llloom memory lane.
 # memory/llloom/state/search/
