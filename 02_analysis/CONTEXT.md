@@ -6,6 +6,15 @@ then open only the material needed by the assigned question or generated prompt.
 Accepted decisions belong in `../00_brief/decisions.md`; admitted work belongs in
 `../roadmap.yaml`. Analysis does not override either source of authority.
 
+## Planning entry
+
+Start with the bounded [foundation brief](foundation-brief.md). The
+[actionable findings](actionable-findings.md) rank five retained mechanisms and
+the lean proposed sequence. Detailed reviews below are optional evidence lookups;
+do not load them all or treat their contents as admitted features.
+
+## Optional evidence
+
 | Need | Read |
 |---|---|
 | Bounded input for the initial foundation contract | [foundation-brief.md](foundation-brief.md) |
@@ -16,6 +25,8 @@ Accepted decisions belong in `../00_brief/decisions.md`; admitted work belongs i
 | Article review: typed session handoffs, deterministic extraction, evidence retention, and continuation-quality evaluation | [session-handoff-source-review-2026-10-25.md](session-handoff-source-review-2026-10-25.md) |
 | Article review: inventory-derived triage candidates, label leakage, skewed evaluations, and readiness versus worker suitability | [issue-triage-source-review-2026-10-25.md](issue-triage-source-review-2026-10-25.md) |
 | Seven cloned repository source reviews: routing proxies, shadow/effective identity, supervision, compaction, evidence funnels, local logits and batched ranking | Relevant sections of [jev-repository-roundup-2026-10-25.md](jev-repository-roundup-2026-10-25.md) |
+| Rejected agent-jev candidate and reason not to repeat its evaluation | [agent-jev-disposition-2026-10-25.md](agent-jev-disposition-2026-10-25.md) |
+| HN review discussion: confirmed demo version, unversioned anecdotes, and the limits of priority classification | [hn-review-caution-2026-10-25.md](hn-review-caution-2026-10-25.md) |
 
 The imported research is dated 2026-10-25 and is not proof of a current runtime.
 RelayForge has no implemented product yet. The non-Python language and storage

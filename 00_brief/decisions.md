@@ -74,3 +74,29 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
 - Reason: Follow initialization/architect.md without inventing product/toolchain
   authority during template setup.
 - Supersedes: none
+
+## D007 — Reject agent-jev
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Exclude malevrigns/agent-jev from the implementation plan and stop
+  its evaluation. Preserve the completed source findings as optional reference;
+  do not install, integrate or schedule further experiments unless the owner
+  explicitly reopens this candidate.
+- Reason: Owner instruction: "ok wee reject it then".
+- Evidence: ../02_analysis/agent-jev-disposition-2026-10-25.md
+- Supersedes: consideration of agent-jev as a possible backend; no accepted
+  implementation or provider decision existed.
+
+## D008 — Research broadly and adopt selectively
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Keep the implementation path limited to actionable mechanisms that
+  solve a concrete RelayForge problem, improve a relevant outcome over a simpler
+  baseline, and earn their complexity. Research availability alone admits no
+  feature, abstraction or dependency. Keep detailed evidence optional; curate
+  the strongest findings into the bounded planning context.
+- Reason: Owner rejects forcing unsuitable components into the project and asks
+  to separate grain from chaff, retaining only the most actionable ideas.
+- Supersedes: article-by-article accumulation as the shape of the foundation brief.
