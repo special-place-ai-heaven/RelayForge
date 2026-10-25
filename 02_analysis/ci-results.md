@@ -53,3 +53,21 @@ rejected, including bootstrap, digest, shell-profile, default-toolchain,
 job-home and later-step PATH mutations. This is configuration evidence only.
 The architect-owned full verification and a new actual CI run remain pending;
 the frozen S02 report and failed-run history are unchanged.
+
+## M004-S04 compiler wrapper isolation
+
+Actual run 40211448552 on `fccb02e` passed hosted Windows. Linux Rustup
+bootstrap succeeded and installed Rust 1.99.1, but Cargo then failed while
+trying the inherited `RUSTC_WRAPPER=sccache`, which was unavailable (exit 101).
+No Linux product stage passed or completed in that run.
+
+The S04 workflow sets empty `RUSTC_WRAPPER` and
+`RUSTC_WORKSPACE_WRAPPER` values at job scope for both jobs. The contract
+checker requires those exact empty values and rejects missing or nonempty
+overrides. The focused checker passed with 31 unsafe fixtures rejected,
+including step-level wrapper overrides. A
+bounded local child-process probe ran the same pinned, locked, offline Cargo
+fetch twice: the unavailable wrapper exited 101 and both empty overrides exited
+0. This establishes only local behavior. The architect-owned round-2 verification
+receipt is `05_governance/reviews/m004/M004-S04_r2_verification.json`. Remote Linux
+qualification remains pending a new actual CI run; S02 evidence remains frozen.

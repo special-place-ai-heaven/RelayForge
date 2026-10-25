@@ -76,6 +76,9 @@ def validate(workflow: dict) -> None:
     jobs = workflow.get("jobs")
     require(isinstance(jobs, dict) and set(jobs) == {"windows", "linux"}, "expected exactly Windows and gated Linux jobs")
     windows, linux = jobs["windows"], jobs["linux"]
+    expected_wrappers = {"RUSTC_WRAPPER": "", "RUSTC_WORKSPACE_WRAPPER": ""}
+    for name, job in jobs.items():
+        require(job.get("env") == expected_wrappers, f"{name} must clear inherited Rust compiler wrappers")
     require(windows.get("runs-on") == "windows-latest" and "if" not in windows, "fork PRs need hosted Windows verification")
     require(linux.get("runs-on") == ["self-hosted", "linux", "fresh"], "custom runner labels changed")
     require(" ".join(str(linux.get("if", "")).split()) == LINUX_GATE, "custom runner trust gate changed")
@@ -90,6 +93,13 @@ def validate(workflow: dict) -> None:
         require(timeout is not None and timeout.isdigit() and 0 < int(timeout) <= 30, f"{name} timeout missing or excessive")
         steps = job.get("steps")
         require(isinstance(steps, list) and steps, f"{name} steps missing")
+        for index, step in enumerate(steps):
+            step_env = step.get("env", {})
+            require(isinstance(step_env, dict), f"{name} step {index} env must be a mapping")
+            require(
+                all(step_env.get(key, "") == "" for key in expected_wrappers),
+                f"{name} step {index} must not set nonempty Rust compiler wrappers",
+            )
         actions = [step["uses"] for step in steps if "uses" in step]
         allowed = {CHECKOUT, SETUP_PYTHON} if name == "windows" else {CHECKOUT}
         require(set(actions) == allowed and len(actions) == len(allowed), f"{name} action pin changed")
@@ -161,6 +171,13 @@ def negative_fixtures(workflow: dict) -> int:
         ("escaped Rust home", lambda w: w["jobs"]["linux"]["steps"][1]["env"].update({"RUSTUP_HOME": "/tmp/shared-rustup"})),
         ("escaped Cargo home", lambda w: w["jobs"]["linux"]["steps"][2]["env"].update({"CARGO_HOME": "/tmp/shared-cargo"})),
         ("missing later path", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace('>> "$GITHUB_PATH"', '> /dev/null')})),
+        ("missing Rust compiler wrapper overrides", lambda w: w["jobs"]["windows"].pop("env")),
+        ("missing RUSTC_WRAPPER override", lambda w: w["jobs"]["windows"]["env"].pop("RUSTC_WRAPPER")),
+        ("missing RUSTC_WORKSPACE_WRAPPER override", lambda w: w["jobs"]["linux"]["env"].pop("RUSTC_WORKSPACE_WRAPPER")),
+        ("nonempty Rust compiler wrapper", lambda w: w["jobs"]["linux"].update({"env": {"RUSTC_WRAPPER": "sccache", "RUSTC_WORKSPACE_WRAPPER": ""}})),
+        ("nonempty workspace compiler wrapper", lambda w: w["jobs"]["windows"].update({"env": {"RUSTC_WRAPPER": "", "RUSTC_WORKSPACE_WRAPPER": "sccache"}})),
+        ("step-level RUSTC_WRAPPER", lambda w: w["jobs"]["windows"]["steps"][-1].setdefault("env", {}).update({"RUSTC_WRAPPER": "sccache"})),
+        ("step-level RUSTC_WORKSPACE_WRAPPER", lambda w: w["jobs"]["linux"]["steps"][2].setdefault("env", {}).update({"RUSTC_WORKSPACE_WRAPPER": "sccache"})),
     ]
     for label, mutate in mutations:
         fixture = copy.deepcopy(workflow)

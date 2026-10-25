@@ -55,3 +55,12 @@ distinct fresh Linux runners accepted jobs; it did not qualify Linux product
 checks. S02 must record a new real run after the correction, with revision,
 native targets/tool versions and per-job conclusions. The `fresh` label does
 not prove host isolation or future availability.
+
+Both jobs set empty `RUSTC_WRAPPER` and `RUSTC_WORKSPACE_WRAPPER` values at
+the job level. This prevents inherited runner wrapper settings from changing
+Cargo's compiler invocation while leaving host configuration untouched. Run
+40211448552 passed Windows; Linux installed Rust 1.99.1, then Cargo failed when
+the inherited `sccache` wrapper was unavailable. That run did not execute Linux
+product stages. The S04 worker probe and configuration evidence are recorded in
+`02_analysis/ci-results.md`; remote Linux qualification remains pending a new
+observed CI run.

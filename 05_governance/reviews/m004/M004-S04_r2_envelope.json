@@ -1,0 +1,57 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M004-S04",
+  "round": 2,
+  "title": "Isolate CI jobs from inherited compiler wrappers",
+  "objective": "Correct the observed missing-sccache wrapper failure using job-local environment overrides.",
+  "acceptance": [
+    "CI job environments explicitly clear RUSTC_WRAPPER and RUSTC_WORKSPACE_WRAPPER without modifying host settings or installing wrappers.",
+    "Preserve all runner trust, bootstrap checksum, pinned/offline toolchain and existing test gates.",
+    "Negative fixtures reject absent or nonempty compiler-wrapper overrides; a bounded probe demonstrates missing-wrapper failure and cleared-wrapper success.",
+    "Focused and authoritative full checks pass locally; document run 40211448552 without claiming unobserved Linux success."
+  ],
+  "non_goals": [
+    "Product changes, dependency installation, host configuration changes or edits to the frozen S02 evidence envelope."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "00_brief/decisions.md",
+    ".github/workflows/ci.yml",
+    "scripts/ci_contract_check.py",
+    "docs/ci.md"
+  ],
+  "allowed_prefixes": [
+    ".github/workflows/ci.yml",
+    "scripts/ci_contract_check.py",
+    "docs/ci.md",
+    "02_analysis/ci-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/ci_contract_check.py"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Source review: `05_governance/reviews/m004/M004-S04_r1_review.md` (sha256 `b38d809d3aea89a5ffc555115c0869fecbfb96c7223d16e9276fc9e1ca37c7f5`)\n| M004-S04-ENV-001 | P2 | open | `scripts/ci_contract_check.py:79-81, 167-171`: validation checks only job-level wrapper values. A read-only probe added `RUSTC_WRAPPER=sccache` to the Windows full-verification step's environment; `validate` accepted it, allowing a step-level override to restore the observed failure. Reject nonempty wrapper values in every step environment and add a fixture. |",
+  "memory": ""
+}
