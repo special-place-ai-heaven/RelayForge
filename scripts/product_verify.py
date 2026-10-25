@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -12,8 +13,8 @@ from pathlib import Path
 import canary_verify as canary
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGET = "x86_64-pc-windows-msvc"
 MANIFEST = ROOT / "Cargo.toml"
+STAGES = ("fmt", "clippy", "unit", "integration", "doc")
 REQUIRED = {
     "tests::unknown_fields_and_schema_versions_are_rejected",
     "tests::event_size_and_depth_are_bounded",
@@ -37,50 +38,63 @@ def cargo(*args: str) -> list[str]:
     return ["cargo", "+1.99.1", *args]
 
 
-def run_product(root: Path, scratch: Path) -> None:
+def run_product(root: Path, scratch: Path, stages: tuple[str, ...] = STAGES) -> None:
     root = root.resolve()
     scratch = scratch.resolve()
     if scratch == root or root in scratch.parents:
         raise canary.VerificationError("product verification scratch must be outside source tree")
     env = os.environ.copy()
     env.update({"CARGO_TARGET_DIR": str(scratch / "cargo-target"), "CARGO_NET_OFFLINE": "true", "CARGO_BUILD_JOBS": "2"})
-    env["RELAYFORGE_CLI_PATH"] = str(Path(env["CARGO_TARGET_DIR"]) / TARGET / "debug" / "relayforge.exe")
     deadline = time.monotonic() + canary.TIMEOUT_SECONDS
-    for command in (
-        ["rustc", "+1.99.1", "--version"],
-        cargo("--version"),
-        ["rustfmt", "+1.99.1", "--version"],
-        cargo("clippy", "--version"),
-    ):
+    if stages == STAGES:
+        canary._run([sys.executable, "-B", "scripts/ci_contract_check.py"], cwd=root, env=env, deadline=deadline, scratch=scratch)
+    rustc = canary._run(["rustc", "+1.99.1", "-vV"], cwd=root, env=env, deadline=deadline, scratch=scratch)
+    hosts = re.findall(r"^host: (\S+)$", rustc.stdout, re.MULTILINE)
+    if not rustc.stdout.startswith("rustc 1.99.1 ") or len(hosts) != 1:
+        raise canary.VerificationError("pinned rustc did not report one native host target")
+    target = hosts[0]
+    suffix = ".exe" if os.name == "nt" else ""
+    env["RELAYFORGE_CLI_PATH"] = str(Path(env["CARGO_TARGET_DIR"]) / target / "debug" / f"relayforge{suffix}")
+    print(f"PRODUCT NATIVE TARGET {target}; CLI suffix={suffix!r}", flush=True)
+    for command in (cargo("--version"), ["rustfmt", "+1.99.1", "--version"], cargo("clippy", "--version")):
         canary._run(command, cwd=root, env=env, deadline=deadline, scratch=scratch)
+    installed = canary._run(["rustup", "target", "list", "--installed", "--toolchain", "1.99.1"], cwd=root, env=env, deadline=deadline, scratch=scratch)
+    if target not in installed.stdout.split():
+        raise canary.VerificationError(f"native Rust target is not installed: {target}")
 
-    graph = canary._run(cargo("tree", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--locked", "--offline", "--target", TARGET), cwd=root, env=env, deadline=deadline, scratch=scratch)
+    graph = canary._run(cargo("tree", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--locked", "--offline", "--target", target), cwd=root, env=env, deadline=deadline, scratch=scratch)
     if "rusqlite v0.40.0" not in graph.stdout or "libsqlite3-sys v0.38.0" not in graph.stdout:
         raise canary.VerificationError("product dependency graph does not lock rusqlite 0.40.0 and libsqlite3-sys 0.38.0")
-    features = canary._run(cargo("tree", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--locked", "--offline", "--target", TARGET, "--edges", "features", "-i", "libsqlite3-sys"), cwd=root, env=env, deadline=deadline, scratch=scratch)
+    features = canary._run(cargo("tree", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--locked", "--offline", "--target", target, "--edges", "features", "-i", "libsqlite3-sys"), cwd=root, env=env, deadline=deadline, scratch=scratch)
     if 'feature "bundled"' not in features.stdout:
         raise canary.VerificationError("product SQLite dependency does not enable bundled")
-    canary._run(cargo("fmt", "--manifest-path", str(root / "Cargo.toml"), "--all", "--", "--check"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    canary._run(cargo("clippy", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--all-targets", "--target", TARGET, "--locked", "--offline", "--", "-D", "warnings"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    canary._run(cargo("build", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--all-targets", "--target", TARGET, "--locked", "--offline"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    sqlite = canary._run(cargo("run", "--manifest-path", str(root / "Cargo.toml"), "--locked", "--offline", "--target", TARGET, "--bin", "relayforge", "--", "sqlite-version"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    if '"sqlite_version":"3.53.1"' not in sqlite.stdout.replace(" ", ""):
-        raise canary.VerificationError("bundled runtime does not report SQLite 3.53.1")
-
-    discovered = canary._run(cargo("test", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--all-targets", "--target", TARGET, "--locked", "--offline", "--", "--list"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    found = canary.guard_discovery(discovered.stdout + discovered.stderr, REQUIRED, "product")
-    print(f"PRODUCT TEST DISCOVERY discovered={len(found)} required={len(REQUIRED)} ignored=0", flush=True)
-    doctest_list = canary._run(cargo("test", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--doc", "--target", TARGET, "--locked", "--offline", "--", "--list"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    doctests = canary.guard_discovery(doctest_list.stdout + doctest_list.stderr, set(), "product doctest")
-    if not doctests:
-        raise canary.VerificationError("product doctest discovery is empty")
-
-    executed = canary._run(cargo("test", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--all-targets", "--target", TARGET, "--locked", "--offline", "--", "--nocapture", "--test-threads=1"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    counts = canary.parse_execution(executed.stdout + executed.stderr, found, "product")
-    print(f"PRODUCT TEST EXECUTION discovered={len(found)} passed={counts[0]} failed={counts[1]} ignored={counts[2]}", flush=True)
-    docs = canary._run(cargo("test", "--manifest-path", str(root / "Cargo.toml"), "--workspace", "--doc", "--target", TARGET, "--locked", "--offline"), cwd=root, env=env, deadline=deadline, scratch=scratch)
-    doc_counts = canary.parse_execution(docs.stdout + docs.stderr, doctests, "product doctest")
-    print(f"PRODUCT DOCTEST EXECUTION discovered={len(doctests)} passed={doc_counts[0]} failed={doc_counts[1]} ignored={doc_counts[2]}", flush=True)
+    if stages == STAGES:
+        canary._run(cargo("build", "--manifest-path", str(MANIFEST), "--workspace", "--all-targets", "--target", target, "--locked", "--offline"), cwd=root, env=env, deadline=deadline, scratch=scratch)
+    if "fmt" in stages:
+        canary._run(cargo("fmt", "--manifest-path", str(MANIFEST), "--all", "--", "--check"), cwd=root, env=env, deadline=deadline, scratch=scratch)
+    if "clippy" in stages:
+        canary._run(cargo("clippy", "--manifest-path", str(MANIFEST), "--workspace", "--all-targets", "--target", target, "--locked", "--offline", "--", "-D", "warnings"), cwd=root, env=env, deadline=deadline, scratch=scratch)
+    for stage, selector, required in (
+        ("unit", ["--workspace", "--lib"], {name for name in REQUIRED if name.startswith("tests::")}),
+        ("integration", ["--manifest-path", str(root / "08_pkg/relayforge-core/Cargo.toml"), "--test", "storage_contract"], {name for name in REQUIRED if not name.startswith("tests::")}),
+        ("doc", ["--workspace", "--doc"], set()),
+    ):
+        if stage not in stages:
+            continue
+        if stage == "integration":
+            canary._run(cargo("build", "--manifest-path", str(MANIFEST), "--bin", "relayforge", "--target", target, "--locked", "--offline"), cwd=root, env=env, deadline=deadline, scratch=scratch)
+            sqlite = canary._run([env["RELAYFORGE_CLI_PATH"], "sqlite-version"], cwd=root, env=env, deadline=deadline, scratch=scratch)
+            if '"sqlite_version":"3.53.1"' not in sqlite.stdout.replace(" ", ""):
+                raise canary.VerificationError("bundled runtime does not report SQLite 3.53.1")
+            print("PRODUCT SQLITE RUNTIME 3.53.1", flush=True)
+        base = cargo("test", *selector, "--target", target, "--locked", "--offline")
+        discovered = canary._run([*base, "--", "--list"], cwd=root, env=env, deadline=deadline, scratch=scratch)
+        found = canary.guard_discovery(discovered.stdout + discovered.stderr, required, f"product {stage}")
+        print(f"PRODUCT {stage.upper()} DISCOVERY discovered={len(found)} required={len(required)}", flush=True)
+        extra = ["--", "--nocapture", "--test-threads=1"] if stage != "doc" else []
+        executed = canary._run([*base, *extra], cwd=root, env=env, deadline=deadline, scratch=scratch)
+        counts = canary.parse_execution(executed.stdout + executed.stderr, found, f"product {stage}")
+        print(f"PRODUCT {stage.upper()} EXECUTION discovered={len(found)} passed={counts[0]} failed={counts[1]} ignored={counts[2]}", flush=True)
 
 
 def main() -> int:
@@ -92,6 +106,16 @@ def main() -> int:
                     raise canary.VerificationError("focused scratch escaped system temp")
                 run_product(ROOT, scratch)
             print("FOCUSED PRODUCT VERIFICATION PASS", flush=True)
+            return 0
+        if "--stage" in sys.argv[1:]:
+            args = sys.argv[1:]
+            index = args.index("--stage")
+            if index + 1 >= len(args) or args[index + 1] not in STAGES:
+                raise canary.VerificationError(f"stage must be one of {STAGES}")
+            stage = args[index + 1]
+            with tempfile.TemporaryDirectory(prefix=f"relayforge-product-{stage}-") as name:
+                run_product(ROOT, Path(name), (stage,))
+            print(f"PRODUCT STAGE {stage} PASS", flush=True)
             return 0
         if os.environ.get(canary.INNER_GUARD) == "1":
             canary.verify_inner()

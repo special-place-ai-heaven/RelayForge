@@ -16,7 +16,6 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = Path("08_pkg/canary/Cargo.toml")
-TARGET = "x86_64-pc-windows-msvc"
 TIMEOUT_SECONDS = 900
 INNER_GUARD = "RELAYFORGE_CANARY_INNER"
 REQUIRED_TESTS = {
@@ -187,7 +186,7 @@ def self_test() -> str:
 
 def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Path) -> None:
     version_checks = [
-        ["rustc", "+1.99.1", "--version"],
+        ["rustc", "+1.99.1", "-vV"],
         _cargo("--version"),
         ["rustfmt", "+1.99.1", "--version"],
         ["cargo", "+1.99.1", "clippy", "--version"],
@@ -201,19 +200,24 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
     cargo_version = results[1].stdout.strip()
     if not rustc_version.startswith("rustc 1.99.1 ") or not cargo_version.startswith("cargo 1.99.1 "):
         raise VerificationError("rustc and cargo must both report the pinned 1.99.1 version")
-    revision = re.search(r"\(([0-9a-f]{8})", rustc_version)
+    revision = re.search(r"^commit-hash: ([0-9a-f]{8})", rustc_version, re.MULTILINE)
     if revision is None or any(
         revision.group(1) not in result.stdout
         for result in results[2:4]
     ):
         raise VerificationError("rustfmt and Clippy do not match the pinned rustc toolchain build")
-    if TARGET not in results[4].stdout.split():
-        raise VerificationError(f"required Rust target is not installed: {TARGET}")
+    hosts = re.findall(r"^host: (\S+)$", rustc_version, re.MULTILINE)
+    if len(hosts) != 1:
+        raise VerificationError("pinned rustc did not report exactly one host target")
+    target = hosts[0]
+    if target not in results[4].stdout.split():
+        raise VerificationError(f"required Rust target is not installed: {target}")
+    print(f"CANARY NATIVE TARGET {target}", flush=True)
 
     graph = _run(
         _cargo(
             "tree", "--manifest-path", str(MANIFEST), "--locked", "--offline",
-            "--target", TARGET, "-i", "libsqlite3-sys",
+            "--target", target, "-i", "libsqlite3-sys",
         ),
         cwd=root,
         env=env,
@@ -224,7 +228,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
         raise VerificationError("locked dependency graph does not match rusqlite 0.40.0/libsqlite3-sys 0.38.0")
     features = _run(
         _cargo(
-            "tree", "--locked", "--offline", "--target", TARGET,
+            "tree", "--locked", "--offline", "--target", target,
             "--manifest-path", str(MANIFEST), "--edges", "features", "-i", "libsqlite3-sys",
         ),
         cwd=root,
@@ -244,7 +248,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
     )
     _run(
         _cargo(
-            "clippy", "--manifest-path", str(MANIFEST), "--all-targets", "--target", TARGET,
+            "clippy", "--manifest-path", str(MANIFEST), "--all-targets", "--target", target,
             "--locked", "--offline", "--", "-D", "warnings",
         ),
         cwd=root,
@@ -254,7 +258,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
     )
     _run(
         _cargo(
-            "build", "--manifest-path", str(MANIFEST), "--all-targets", "--target", TARGET,
+            "build", "--manifest-path", str(MANIFEST), "--all-targets", "--target", target,
             "--locked", "--offline",
         ),
         cwd=root,
@@ -265,7 +269,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
 
     discovered = _run(
         _cargo(
-            "test", "--manifest-path", str(MANIFEST), "--all-targets", "--target", TARGET,
+            "test", "--manifest-path", str(MANIFEST), "--all-targets", "--target", target,
             "--locked", "--offline", "--", "--list",
         ),
         cwd=root,
@@ -287,7 +291,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
 
     doctest_list = _run(
         _cargo(
-            "test", "--manifest-path", str(MANIFEST), "--doc", "--target", TARGET,
+            "test", "--manifest-path", str(MANIFEST), "--doc", "--target", target,
             "--locked", "--offline", "--", "--list",
         ),
         cwd=root,
@@ -304,7 +308,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
 
     executed = _run(
         _cargo(
-            "test", "--manifest-path", str(MANIFEST), "--all-targets", "--target", TARGET,
+            "test", "--manifest-path", str(MANIFEST), "--all-targets", "--target", target,
             "--locked", "--offline",
         ),
         cwd=root,
@@ -321,7 +325,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
 
     doctests_run = _run(
         _cargo(
-            "test", "--manifest-path", str(MANIFEST), "--doc", "--target", TARGET,
+            "test", "--manifest-path", str(MANIFEST), "--doc", "--target", target,
             "--locked", "--offline",
         ),
         cwd=root,
@@ -337,7 +341,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
 
     version = _run(
         _cargo(
-            "run", "--manifest-path", str(MANIFEST), "--locked", "--offline", "--target", TARGET,
+            "run", "--manifest-path", str(MANIFEST), "--locked", "--offline", "--target", target,
             "--bin", "relayforge", "--", "sqlite-version",
         ),
         cwd=root,
@@ -352,7 +356,7 @@ def _rust_commands(root: Path, env: dict[str, str], deadline: float, scratch: Pa
     database = scratch / "runtime" / "canary.db"
     database.parent.mkdir(parents=True, exist_ok=True)
     common = [
-        "run", "--manifest-path", str(MANIFEST), "--locked", "--offline", "--target", TARGET,
+        "run", "--manifest-path", str(MANIFEST), "--locked", "--offline", "--target", target,
         "--bin", "relayforge", "--",
     ]
 
@@ -642,6 +646,10 @@ def _candidate_run(
         "08_pkg/canary/src/main.rs",
         "08_pkg/canary/tests/storage_contract.rs",
         "scripts/canary_verify.py",
+        ".github/workflows/ci.yml",
+        "scripts/ci_contract_check.py",
+        "docs/ci.md",
+        "02_analysis/ci-results.md",
     )
     blob_ids = dict(manifest)
     missing = [path for path in product_paths if path not in blob_ids]
