@@ -73,3 +73,8 @@ and enforce them where supported; track usage across sessions. Prose limits are
 not enforcement. Retry only with a changed hypothesis; after two failed attempts
 on the same hypothesis, stop that approach and investigate/escalate. This is a
 workflow stop rule, not an approved product failure-rate threshold.
+
+D013 authorizes non-force pushes to origin after reviewed, committed milestones.
+D014 assigns Linux CI to self-hosted runners labeled `fresh` and Windows CI to
+GitHub-hosted `windows-latest`; public PR trust gates must protect the custom
+runners. These instructions do not waive D012 or any release acceptance gate.

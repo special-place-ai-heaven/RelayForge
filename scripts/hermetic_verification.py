@@ -12,12 +12,13 @@ import _workspace
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Scaffold gates only; add native build/test gates before admitting product code.
+# Keep scaffold gates and qualify the disposable native canary.
 COMMANDS: list[object] = [
     ["python", "-B", "scripts/roadmap.py", "check"],
     ["python", "-B", "scripts/ledger.py", "check"],
     ["git", "diff", "--check"],
     ["git", "diff", "--cached", "--check"],
+    ["python", "-B", "scripts/canary_verify.py"],
 ]
 
 

@@ -1,8 +1,7 @@
 # Workspace: package
 
-Status: inactive
+Status: canary active; reusable core not admitted
 
-Reserved for the embeddable RelayForge core and public contracts after toolchain
-selection and the disposable canary. The product language is undecided and not
-Python; see ../00_brief/decisions.md D003. No package API exists yet.
-Activate only when an admitted roadmap slice names this workspace.
+The admitted M002-S02 slice uses this workspace only for the disposable native
+canary. Rust 1.99.1 and SQLite are selected by D010; canary qualification remains
+pending. The reusable RelayForge core and public contracts are not admitted yet.

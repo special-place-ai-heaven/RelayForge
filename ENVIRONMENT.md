@@ -13,13 +13,11 @@ product has passed any runtime checks.
 
 ## Product runtime decision
 
-The owner requires a non-Python product implementation. The language is still
-undecided; Rust is a proposal. Existing external Python JEV code is a compatibility
-reference, not RelayForge's product runtime. Storage is also undecided; SQLite is
-a candidate. Record the toolchain decision in
-[the decision register](00_brief/decisions.md) before admitting its disposable
-implementation canary. This file will gain actual product setup and verification
-commands when that decision and implementation exist.
+The owner selected Rust 1.99.1 and SQLite for the non-Python product runtime
+(D010). Existing external Python JEV code is a compatibility reference, not
+RelayForge's product runtime. The disposable canary qualification is pending;
+its maintained verification command is part of the full check and will pass
+once `scripts/canary_verify.py` is implemented and the canary qualifies.
 
 ## Setup
 

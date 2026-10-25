@@ -178,3 +178,35 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   or contact external parties is implied. The architect owns exclusion evidence;
   the human owner obtains upstream permission if that route is chosen.
 - Supersedes: Any assumption that repository licensing alone clears distribution.
+
+## D013 — Push reviewed milestones with the existing owner identity
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Push the current committed branch to origin without force and push
+  after each reviewed, committed milestone for the remainder of this campaign.
+  Use the existing Git identity attributed to special-place-administrator;
+  invent no email and add no AI co-author trailers. Report authentication
+  failures or remote divergence; never force-push. Keep source, tests, lockfiles,
+  documentation and required workflow evidence tracked while excluding local
+  stores, credentials, caches, build output and raw runtime data. Check already
+  tracked files separately; ignore rules do not untrack files.
+- Reason: Explicit owner instruction. The owner-requested .gitignore change was
+  reviewed and committed separately as 89c0937; current branch push succeeded.
+- Supersedes: D009 prohibition on repository pushes only. D012 packaging and
+  distribution gate remains; no release publication or host reconfiguration is
+  implied by this Git synchronization authority.
+
+## D014 — Use fresh Linux capacity and GitHub-hosted Windows CI
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Run Linux CI jobs on the owner's five custom self-hosted runners
+  labeled `fresh`; run Windows builds and tests on GitHub-hosted
+  `windows-latest`. The repository is public. Use the Linux runners for extra
+  parallel PR-check capacity, with explicit trust gates for public fork PRs,
+  least-privilege job permissions and no privileged execution of untrusted PR
+  code. The label does not itself prove ephemeral isolation. Qualify Linux
+  separately before claiming Linux support; Windows remains the initial target.
+- Reason: Explicit owner runner instruction during the release campaign.
+- Supersedes: None; CI is to be admitted with tests and independent review.
