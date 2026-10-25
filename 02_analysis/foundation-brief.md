@@ -83,6 +83,16 @@ details when defining the existing contracts; they do not admit new features:
 Read the detailed review only for those questions. The first slice remains the
 bounded foundation contract; routing, gates, and skill selection are unimplemented.
 
+The [Ten Levels source investigation](ten-levels-jev-source-review-2026-10-25.md)
+adds concrete implementation limits: its router uses prose lanes, file filtering
+makes one call per retained file, guard errors fail open, and compaction thresholds
+advise the Pi agent rather than directly enforcing compaction. For the foundation,
+retain attempt-level failure/cost records and explicit adapter capabilities;
+compact answers do not prove lower total cost or correctness. Raw request retention
+and arbitrary command execution are not default RelayForge telemetry features.
+Read that source review only when designing the corresponding contract or later
+experiment; the ten demonstration levels do not expand the admitted scope.
+
 ## Foundation slice output
 
 Specify the minimum contracts and compare at most two non-Python toolchain

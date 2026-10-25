@@ -12,6 +12,7 @@ Accepted decisions belong in `../00_brief/decisions.md`; admitted work belongs i
 | Detailed registry, routing, observation, recovery, and evaluation contracts | Relevant sections of [phase1-spec.md](phase1-spec.md) |
 | Historical configuration findings, research claims, sources, and their limits | Relevant sections of [evidence-brief.md](evidence-brief.md) |
 | Coding-agent failure taxonomy, JEV batching/confidence, skill selection, and router/firewall design lessons | Relevant sections of [registry-source-review-2026-10-25.md](registry-source-review-2026-10-25.md) |
+| Source-level investigation of Ten Levels of JEV: Pi hooks, cheap reads, file fanout, compaction, dynamic questions, and accounting limits | Relevant sections of [ten-levels-jev-source-review-2026-10-25.md](ten-levels-jev-source-review-2026-10-25.md) |
 
 The imported research is dated 2026-10-25 and is not proof of a current runtime.
 RelayForge has no implemented product yet. The non-Python language and storage
