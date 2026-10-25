@@ -1,0 +1,79 @@
+[
+  {
+    "slice": "M003-S01",
+    "path": "scripts/canary_verify.py",
+    "sha": "321fd38ed36fcafb9c3a436e9b2b8436b845d5c4351e696a9959ab91e54ccaa9",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M003-S01",
+    "path": "02_analysis/native-core-results.md",
+    "sha": "5826c086dcee1e9c82eb104c195916d69573836b176eee6c28708de90d8289c8",
+    "kind": "added",
+    "round": 3
+  },
+  {
+    "slice": "M003-S01",
+    "path": "07_app/relayforge-cli/Cargo.toml",
+    "sha": "863c74a21450636d6d49d3d8fae8ef99d4467d0497227bd56e08b4e608521126",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "07_app/relayforge-cli/src/main.rs",
+    "sha": "b2f541d933667dc826c6f8e11f2c9d12d96ba224d324669d67effe5c0bd2cc5c",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "08_pkg/relayforge-core/Cargo.toml",
+    "sha": "133bdec4c16cb1912e47285c238717a66863f9b13e0e95f38f469015d1f8d03b",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "08_pkg/relayforge-core/src/lib.rs",
+    "sha": "dd634f75b3e1782ee1d9a142647ab20678a7c4a28c350964865f8a40b10a62c1",
+    "kind": "added",
+    "round": 3
+  },
+  {
+    "slice": "M003-S01",
+    "path": "08_pkg/relayforge-core/tests/storage_contract.rs",
+    "sha": "3cf9cb970dd1717a7d5139831c3ba4096a449a136962b0ac6fc5ec7b0fcd9f67",
+    "kind": "added",
+    "round": 3
+  },
+  {
+    "slice": "M003-S01",
+    "path": "Cargo.lock",
+    "sha": "b605cc2e009b1276442ddb7c47983e62083787a806936725d370a72fa3b46f4a",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "Cargo.toml",
+    "sha": "4e1ff29ccaefcab3608844f442eba47b899cee8f62f8c046d83803c3498b0cc0",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "rust-toolchain.toml",
+    "sha": "7270b910fc4decd555fbb2f01f3030bc87b46cdd2c727229274d9dd0f1eb2a52",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M003-S01",
+    "path": "scripts/product_verify.py",
+    "sha": "4c11a4528352f6930ab9a1fa86839fef97dbf799a85cce535219a913090c81da",
+    "kind": "added",
+    "round": 3
+  }
+]
