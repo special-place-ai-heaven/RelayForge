@@ -21,6 +21,44 @@ LINUX_GATE = (
     "contains(fromJSON('[\"OWNER\",\"MEMBER\",\"COLLABORATOR\"]'), "
     "github.event.pull_request.author_association)))"
 )
+LINUX_HOMES = {
+    "RUSTUP_HOME": "${{ runner.temp }}/relayforge-rustup",
+    "CARGO_HOME": "${{ runner.temp }}/relayforge-cargo",
+}
+LINUX_PROVISION = """set -euo pipefail
+python3 --version
+getconf GNU_LIBC_VERSION >/dev/null
+temp_root="$(realpath "$RUNNER_TEMP")"
+mkdir -p "$RUSTUP_HOME" "$CARGO_HOME"
+test "$(realpath "$RUSTUP_HOME")" = "$temp_root/relayforge-rustup"
+test "$(realpath "$CARGO_HOME")" = "$temp_root/relayforge-cargo"
+case "$(uname -m)" in
+x86_64)
+installer_target=x86_64-unknown-linux-gnu
+expected_sha=20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c
+;;
+aarch64)
+installer_target=aarch64-unknown-linux-gnu
+expected_sha=e3853c5a252fca15252d07cb23a1bdd9377a8c6f3efa01531109281ae47f841c
+;;
+*) echo "unsupported Rustup bootstrap architecture" >&2; exit 1 ;;
+esac
+installer="$CARGO_HOME/rustup-init"
+url="https://static.rust-lang.org/rustup/archive/1.28.2/$installer_target/rustup-init"
+python3 -c 'import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' "$url" "$installer"
+printf '%s  %s\\n' "$expected_sha" "$installer" | sha256sum --check --status
+chmod +x "$installer"
+"$installer" -y --no-modify-path --default-toolchain none --profile minimal
+export PATH="$CARGO_HOME/bin:$PATH"
+test "$(command -v rustup)" = "$CARGO_HOME/bin/rustup"
+test "$(rustup --version | cut -d' ' -f2)" = "1.28.2"
+test -x "$CARGO_HOME/bin/cargo"
+printf '%s\\n' "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy
+native_target="$(rustc +1.99.1 -vV | sed -n 's/^host: //p')"
+test -n "$native_target"
+cargo +1.99.1 fetch --manifest-path Cargo.toml --locked --target "$native_target"
+"""
 
 
 def require(condition: bool, message: str) -> None:
@@ -73,9 +111,31 @@ def validate(workflow: dict) -> None:
     }
     require(all(full_step.get("env", {}).get(key) == value for key, value in identity.items()), "scratch candidate Git identity changed")
     require('scripts/product_verify.py --stage "${{ matrix.stage }}"' in linux_runs, "Linux product stage missing")
+    require(len(linux["steps"]) == 3, "Linux job must have checkout, provision and verify steps")
+    provision, verify = linux["steps"][1:]
+    require(provision.get("env") == LINUX_HOMES and verify.get("env") == LINUX_HOMES, "Linux Rust homes escaped job storage")
+    require(provision.get("shell") == "bash" and verify.get("shell") == "bash", "Linux shell changed")
+    actual = [line.strip() for line in str(provision.get("run", "")).splitlines()]
+    expected = [line.strip() for line in LINUX_PROVISION.splitlines()]
+    require(actual == expected, "Linux pinned, checksum-gated bootstrap changed")
 
 
 def negative_fixtures(workflow: dict) -> int:
+    def late_checksum(candidate: dict) -> None:
+        step = candidate["jobs"]["linux"]["steps"][1]
+        checksum_lines = [
+            line for line in step["run"].splitlines(keepends=True)
+            if "sha256sum --check --status" in line
+        ]
+        require(len(checksum_lines) == 1, "late-checksum fixture source must contain one checksum")
+        checksum = checksum_lines[0]
+        execution = '"$installer" -y --no-modify-path --default-toolchain none --profile minimal\n'
+        require(step["run"].count(execution) == 1, "late-checksum fixture source must contain one installer execution")
+        step["run"] = step["run"].replace(checksum, "", 1).replace(execution, execution + checksum, 1)
+        require(step["run"].count(checksum) == 1, "late-checksum fixture must retain one checksum line")
+        require(step["run"].count("sha256sum --check --status") == 1, "late-checksum fixture must contain one checksum")
+        require(step["run"].index(execution) < step["run"].index(checksum), "late-checksum fixture must execute first")
+
     mutations = [
         ("fork trigger", lambda w: w["on"].update({"pull_request_target": {}})),
         ("write token", lambda w: w["permissions"].update({"contents": "write"})),
@@ -91,6 +151,16 @@ def negative_fixtures(workflow: dict) -> int:
         ("unbounded parallelism", lambda w: w["jobs"]["linux"]["strategy"].update({"max-parallel": "6"})),
         ("missing stage", lambda w: w["jobs"]["linux"]["strategy"]["matrix"].update({"stage": STAGES[:-1]})),
         ("new ungated job", lambda w: w["jobs"].update({"extra": {"runs-on": ["self-hosted", "linux", "fresh"]}})),
+        ("missing bootstrap", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace('"$installer" -y ', 'true # "$installer" -y ')})),
+        ("mutable installer", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace("archive/1.28.2", "dist")})),
+        ("wrong checksum", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace("20a06e644b0d", "00a06e644b0d")})),
+        ("unchecked installer", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace("sha256sum --check --status", "true")})),
+        ("late checksum", late_checksum),
+        ("shell profile edit", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace("--no-modify-path", "--modify-path")})),
+        ("global default", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace("--default-toolchain none", "--default-toolchain stable")})),
+        ("escaped Rust home", lambda w: w["jobs"]["linux"]["steps"][1]["env"].update({"RUSTUP_HOME": "/tmp/shared-rustup"})),
+        ("escaped Cargo home", lambda w: w["jobs"]["linux"]["steps"][2]["env"].update({"CARGO_HOME": "/tmp/shared-cargo"})),
+        ("missing later path", lambda w: w["jobs"]["linux"]["steps"][1].update({"run": w["jobs"]["linux"]["steps"][1]["run"].replace('>> "$GITHUB_PATH"', '> /dev/null')})),
     ]
     for label, mutate in mutations:
         fixture = copy.deepcopy(workflow)

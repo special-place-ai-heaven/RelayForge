@@ -28,3 +28,28 @@ Worker-local Windows observations for this candidate:
 Linux and hosted-Windows CI qualification is reserved for M004-S02. Runner
 availability, isolation and five simultaneous runner slots remain unobserved
 until real run evidence is recorded there.
+
+## M004-S03 Linux bootstrap correction
+
+The first actual CI run is recorded in `ci-qualification.md`: hosted Windows
+passed; five distinct fresh Linux runners accepted jobs, then failed
+provisioning because `rustup` was absent (observed exit 127 in the formatting
+job). No Linux product stage executed in that run.
+
+The official Rustup manual-installation guide specifies
+`static.rust-lang.org/rustup/archive/{version}/{target}/rustup-init` and its
+`.sha256` sidecar. On 2026-10-25, the official 1.28.2 sidecars and independently
+downloaded binaries both produced these SHA-256 values:
+
+- `x86_64-unknown-linux-gnu`:
+  `20a06e644b0d9bd2fbdbfd52d42540bdde820ea7df86e92e533c073da0cdd43c`
+- `aarch64-unknown-linux-gnu`:
+  `e3853c5a252fca15252d07cb23a1bdd9377a8c6f3efa01531109281ae47f841c`
+
+The corrected workflow checks the pinned digest before execution and confines
+installation to job-local homes. The worker-local
+`python -B scripts/ci_contract_check.py` passed with 24 unsafe fixtures
+rejected, including bootstrap, digest, shell-profile, default-toolchain,
+job-home and later-step PATH mutations. This is configuration evidence only.
+The architect-owned full verification and a new actual CI run remain pending;
+the frozen S02 report and failed-run history are unchanged.

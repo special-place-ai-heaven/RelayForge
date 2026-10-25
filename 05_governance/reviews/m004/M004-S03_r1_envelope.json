@@ -1,0 +1,60 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M004-S03",
+  "round": 1,
+  "title": "Bootstrap Rust inside fresh Linux CI jobs",
+  "objective": "Repair the observed missing-rustup prerequisite without changing host services or runner policy.",
+  "acceptance": [
+    "Use an official version-pinned Rustup installer with verified pinned checksum and job-local homes; reject checksum failure before execution.",
+    "Preserve shell profiles and global defaults, fork exclusion, read-only permissions and all existing stage/test gates.",
+    "Provision Rust 1.99.1 and expose only job-local tool binaries to subsequent steps; keep locked fetch followed by offline checks.",
+    "Extend deterministic workflow checks with missing, mutable or unchecked bootstrap and escaped job-home negative fixtures.",
+    "Local focused and full Windows verification pass; document the observed Linux failure and correction without preclaiming remote success."
+  ],
+  "non_goals": [
+    "Product changes, global software/service installation or changing the frozen S02 qualification envelope."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "00_brief/decisions.md",
+    "02_analysis/ci-plan.md",
+    "02_analysis/ci-qualification.md",
+    ".github/workflows/ci.yml",
+    "scripts/ci_contract_check.py",
+    "docs/ci.md"
+  ],
+  "allowed_prefixes": [
+    ".github/workflows/ci.yml",
+    "scripts/ci_contract_check.py",
+    "docs/ci.md",
+    "02_analysis/ci-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/ci_contract_check.py"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}
