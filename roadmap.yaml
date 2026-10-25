@@ -49,6 +49,7 @@ milestones:
           - 00_brief/decisions.md
           - 02_analysis/CONTEXT.md
           - 02_analysis/foundation-brief.md
+          - 02_analysis/actionable-findings.md
         allowed_prefixes: [02_analysis/foundation-contract.md]
         focused:
           - [python, -B, scripts/roadmap.py, check]

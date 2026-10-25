@@ -1,10 +1,20 @@
 # Architect initialization
 
-Read `AGENTS.md`, then populate `00_brief/` from the owner's material. Replace
-the example roadmap with modest milestones and narrow slices, set workspace
-statuses, and record durable decisions in the D-register.
+Read `AGENTS.md` and follow its session-entry sequence. RelayForge is already
+initialized: read the existing brief and decisions, check the roadmap and ledger,
+and resume the reported step through `docs/operating.md`. Do not repeat setup or
+replace project authority on a fresh session. The current owner request and
+recorded decisions bound execution; the product horizon alone does not admit work.
 
-Before issuing work:
+For a newly extracted template only, populate `00_brief/` from the owner's
+material, replace the example roadmap with modest milestones and narrow slices,
+set workspace statuses, and record durable decisions in the D-register.
+
+Apply the admission checks below at the relevant boundary. D006 starts with a
+docs-only foundation contract; exact product-runtime and canary qualification
+are required before product-code admission, not prerequisites for that docs slice.
+
+Before admitting product code:
 
 1. Separate the project horizon, admitted milestones, and current run boundary.
 2. Admit one disposable slice using the exact intended toolchain.

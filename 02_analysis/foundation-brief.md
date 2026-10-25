@@ -40,7 +40,8 @@ such as SymForge remain the code-intelligence baseline.
 
 ## Next move and limits
 
-**M001-S01 remains unstarted and docs-only.** Produce a compact foundation contract,
+**M001-S01 is docs-only.** Architects obtain its current step from ledger status;
+coders/reviewers use their issued prompt. Produce a compact foundation contract,
 compare at most two non-Python toolchains, and name later exact-toolchain canary,
 real verification and test-discovery gates. Product language and storage remain
 undecided; Rust and SQLite are proposals. Python 3.11+/PyYAML run the retained

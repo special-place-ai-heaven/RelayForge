@@ -52,15 +52,26 @@ Open this repository in Codex or Claude Code. The root [AGENTS.md](AGENTS.md)
 contains the operating constitution; [CLAUDE.md](CLAUDE.md) provides Claude's
 entry point to the same rules.
 
-1. Follow the root startup instructions. A session without a generated coder or
-   reviewer prompt begins with the architect's initialization context.
-2. Read the canonical brief, current roadmap, and ledger status named there.
-   Read each relevant folder's `CONTEXT.md` when entering that workspace.
-3. Use the template's generated coding or review prompt for admitted work. Its
-   `Read first` files and writable boundary define that agent's task.
-4. Load the full research or specification only when the current question needs
-   it. The [foundation brief](02_analysis/foundation-brief.md) provides the bounded
-   entry point; do not scan every folder or inject all project history.
+1. Follow [RelayForge session entry](AGENTS.md#relayforge-session-entry). A broad
+   build/continue request without an issued prompt enters as architect through
+   [initialization/architect.md](initialization/architect.md). This repository is
+   already initialized; a fresh session resumes existing authority and state.
+2. Read the canonical brief, roadmap, and [operating loop](docs/operating.md),
+   then run the named roadmap/ledger checks and status commands. Resume the
+   reported step within the current request's scope.
+3. Read the [analysis index](02_analysis/CONTEXT.md),
+   [foundation brief](02_analysis/foundation-brief.md), and
+   [actionable findings](02_analysis/actionable-findings.md) before planning work.
+   Detailed research and specifications are optional lookups for a named question.
+4. Preview and issue the template's generated coding or review prompt for
+   admitted work, then hand it to the selected agent. Its `Read first` files,
+   role, and writable boundary define that agent's task. The architect records
+   the handoff, verification, review, and acceptance through the operating loop.
+
+The initial admission is a foundation contract, not product implementation; use
+ledger status for the current step and the decision register for toolchain and
+later canary authority. A fresh agent can operate the manual loop within scope;
+these entry points do not install or qualify an autonomous runner.
 
 The project preserves the folder structure, scripts, and manual `/2` workflow of
 [agentic-project-template-v4](https://github.com/jequihua/agentic-project-template-v4).

@@ -8,10 +8,11 @@ Accepted decisions belong in `../00_brief/decisions.md`; admitted work belongs i
 
 ## Planning entry
 
-Start with the bounded [foundation brief](foundation-brief.md). The
-[actionable findings](actionable-findings.md) rank five retained mechanisms and
-the lean proposed sequence. Detailed reviews below are optional evidence lookups;
-do not load them all or treat their contents as admitted features.
+For architect planning, read the bounded [foundation brief](foundation-brief.md)
+and [actionable findings](actionable-findings.md), which rank five retained
+mechanisms and the lean proposed sequence. A coder/reviewer follows the reads
+named in its generated prompt. Detailed reviews below are optional evidence
+lookups; do not load them all or treat their contents as admitted features.
 
 ## Optional evidence
 

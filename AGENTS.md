@@ -9,18 +9,33 @@ views and agent messages are never authority.
 
 ## RelayForge session entry
 
-If no issued coder/reviewer prompt supplies a role, enter as architect. Read
-`initialization/architect.md`, `00_brief/CONTEXT.md` and its named brief files,
-then `roadmap.yaml`. Run `python -B scripts/roadmap.py check` and
-`python -B scripts/ledger.py status` to establish the next move. Do not infer
-completion from a prior chat or issue a slice before checking current state.
+If no issued coder/reviewer prompt supplies a role, enter as architect. This
+includes a fresh request to build or continue RelayForge. Read in this order:
+
+1. `initialization/architect.md`, then `00_brief/CONTEXT.md` and its named brief
+   files for the intent, constraints, accepted decisions, and current run boundary.
+2. `roadmap.yaml` and `docs/operating.md` for admitted slices and the manual `/2`
+   loop, including recovery and the architect/coder/reviewer handoffs.
+3. `02_analysis/CONTEXT.md`, `02_analysis/foundation-brief.md`, and
+   `02_analysis/actionable-findings.md` for the bounded planning input.
+
+Run `python -B scripts/roadmap.py check`, `python -B scripts/ledger.py check`,
+`python -B scripts/ledger.py status`, and `git status --short`. Resume the
+reported step under the current request's authority; do not reissue in-progress
+work or infer completion from prose or a prior chat. The roadmap's next slice
+does not admit the whole product horizon. D005 records the setup-only baseline;
+later execution must respect the current run boundary and unresolved decisions.
+Preview an admitted coding prompt with `python -B scripts/prompt.py <slice> --preview`
+before issuance, then follow `docs/operating.md` for the actual loop.
 
 Enter a numbered workspace through its `CONTEXT.md`. Generated prompts must name
 the applicable contexts and bounded reads. Do not recursively load inactive
 folders or the full research/spec for every task. `02_analysis/CONTEXT.md` indexes
 reference material; current decisions in `00_brief/decisions.md` take precedence
 over superseded planning assumptions. A coder/reviewer with an issued prompt
-keeps the role and read/write envelope in that prompt.
+keeps the role and read/write envelope in that prompt and does not run the
+architect startup sequence. Required slice reads must be named in the generated
+prompt; an optional research link does not expand its evidence window.
 
 ## Read contract
 

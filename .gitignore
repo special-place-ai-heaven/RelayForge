@@ -55,3 +55,6 @@ desktop.ini
 # memory/llloom/state/search/
 # memory/llloom/state/graph/
 # memory/llloom/state/locks/
+
+# Local code-intelligence index; indexing must not dirty a slice baseline.
+/.symforge/
