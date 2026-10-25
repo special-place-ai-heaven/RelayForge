@@ -56,6 +56,23 @@ text cannot bypass the complete frozen-envelope and prompt-size checks.
 
 ## Steering and closure
 
+Before requesting independent review, perform deterministic preflight: validate
+the ledger and current candidate baseline; require a successful full receipt,
+stable source/index/HEAD witness and matching baseline; check required executed
+test/discovery summaries and retained candidate identities; check scope/diff and
+evidence references for missing files or stale current-result claims. Keep
+historical evidence labelled historical. A results document must not attempt to
+embed its own final snapshot or future receipt hash. Fix infrastructure/evidence
+defects before issuing review, preserving failed receipts and frozen envelopes.
+
+Under D017, coders run focused checks on final code; the architect records coded
+work and runs the authoritative full command. Do not spend a second full run on
+predictable pre-coded ledger drift. First review collects all actionable findings;
+follow-up review inspects fixes and affected behavior. Required holistic checks
+reuse unchanged approved code evidence and assess milestone integration/closure.
+Administrative report formatting repair does not repeat implementation or tests.
+None of this weakens mandatory tests, privacy/recovery checks or release review.
+
 Edit the roadmap only between stable loop steps, then check and render it. Add
 or narrow slices rather than rewriting accepted history. When all milestone
 slices are accepted, run `python scripts/prompt.py --holistic M001` when the

@@ -267,3 +267,35 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   The next unmet release dependency is usable G1/G2 code, with D015 accounting
   observations preserved for later G3/G6 aggregation.
 - Supersedes: roadmap N1's pending canary admission only. G1-G6 and Q001 remain.
+
+## D017 — Preflight evidence and review coherent changes without duplicate work
+
+- Status: accepted
+- Date: 2026-10-25
+- Authority: Owner requested streamlined verification/review at the next safe
+  boundary while preserving correctness, recovery, privacy and release gates.
+- Evidence: M002-S02 used four implementation rounds (three independent review
+  reports). R1 review found missing negative-guard execution evidence; r2 full
+  verification failed on the scratch Git baseline; r3 review found stale results
+  wording; r4 closed the findings. M003 additionally exposed missing scratch
+  commit ancestry. These are distinct from M003's two lifecycle product defects,
+  which were collected together and closed with failing-first regressions.
+- Amendment: Coders run final focused checks. After `coded`, the architect runs
+  one authoritative full verification for the current candidate, then preflights
+  baseline validity, witness stability, test/discovery coverage, snapshot identity,
+  evidence completeness and stale references before requesting review. Avoid
+  duplicate worker full runs that predictably fail pre-coded ledger drift.
+- Review: one coherent implementation review collects all actionable findings;
+  follow-up reviews cover fixes, regression evidence and affected behavior.
+  Administrative formatting corrections do not trigger repeated full audits.
+  Mandatory holistic review remains, using approved unchanged evidence to check
+  milestone coverage/integration/closure. All P0-P2 closure and release gates stay.
+- Scope: AGENTS.md, the coding prompt template and docs/operating.md now express
+  this narrow procedure. Existing issued envelopes, historical reports and
+  ledger bytes remain unchanged; no gate is waived and no new progress store is
+  introduced. A milestone or paperwork pass is not release completion.
+- Execution economy: use the lowest task-appropriate worker, compact bounded
+  context, deterministic tooling and one active worker by default. Escalate on
+  concrete complexity or failed evidence; do not add speculative research lanes.
+- Supersedes: the requirement to duplicate the full command in every coder turn
+  before the architect's mandatory authoritative run. No other authority changes.

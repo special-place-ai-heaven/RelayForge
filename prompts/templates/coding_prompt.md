@@ -31,9 +31,12 @@ Focused, run while working:
 
 {{focused}}
 
-Full, run once before finishing:
+Full, run by the architect after recording coded work:
 
 {{full}}
+
+Report your final focused results. The architect owns the authoritative full
+receipt; do not duplicate that run just to encounter pre-coded ledger drift.
 
 ## Advisory notes
 

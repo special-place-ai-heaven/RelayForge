@@ -97,7 +97,10 @@ prevention, accessibility, explicit human requirements, or needed tests.
 - Write only inside the prompt's allowed prefixes. Never edit `roadmap.yaml`,
   `00_brief/`, `05_governance/`, `prompts/`, `questions/answered/`,
   `AGENTS.md`, `CLAUDE.md`, or `frutlups.toml`.
-- Run focused commands while working and the full command once before finishing.
+- Run focused commands on the final implementation before finishing. The
+  architect records `coded` and runs the authoritative full command once on that
+  candidate. Do not duplicate it merely to encounter known pre-coded ledger
+  drift. Report worker and authoritative execution separately (D017).
   Never claim a command passed if you did not observe it pass.
 - Do not commit. End with one short paragraph explaining the implemented
   approach, then exactly four lists: changed files; commands run with pass or
@@ -117,6 +120,13 @@ Use the verification receipt as execution evidence; do not rerun commands unless
 the review prompt explicitly grants that authority. Inspect the stated acceptance
 envelope, changed-file manifest, diff, notes, and receipt. Report findings in the
 required table and end with one closure decision and one verdict.
+
+Collect all actionable findings in the first coherent implementation review.
+Corrective reviews reuse the prior review for unchanged code and inspect fixes,
+their tests and affected behavior. Administrative formatting corrections do not
+require a repeated full audit. Required holistic review checks milestone coverage,
+integration and closure; unchanged single-slice code need not be re-audited.
+These limits do not waive correctness, recovery, privacy or release gates (D017).
 
 Severities: P0 is imminent safety, credential, destructive-authority, or
 data-loss risk; P1 must be fixed before pass; P2 is a material bounded defect
