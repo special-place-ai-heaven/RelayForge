@@ -1,0 +1,65 @@
+[
+  {
+    "slice": "M002-S01",
+    "path": "02_analysis/canary-plan.md",
+    "sha": "be8746393a359fd4a47025445d4f4575f5b80908120c8953c5e1120458673983",
+    "kind": "added",
+    "round": 2
+  },
+  {
+    "slice": "M002-S02",
+    "path": "02_analysis/canary-results.md",
+    "sha": "686e9ed5780b802e58eee1fad0c9fef5d73521d0ae9dac923f6b531c10916fd3",
+    "kind": "added",
+    "round": 4
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/Cargo.lock",
+    "sha": "103ff49663d5778177c762bf5d4c57a53a1fbe26a49299bd37c6a48dff0263a3",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/Cargo.toml",
+    "sha": "0184ff989dcbfade47a4cafbb9df438d6826248cbfa9bfd8c03e722652df5ee5",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/rust-toolchain.toml",
+    "sha": "4387889e7ef217b7a0cea12ee152fb5570ec33880f985bff2ebcd49b963b3b24",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/src/lib.rs",
+    "sha": "081f124d69a12079359f96bf239cd04c7222e688d9c65fe172fe4ec0c73ff2bd",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/src/main.rs",
+    "sha": "67f51419c6885a7ece220188fc5dfd5bdebe8e86d7f4b0fb8de3421e35eadc83",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "08_pkg/canary/tests/storage_contract.rs",
+    "sha": "d8393dc476ea33f3dcff0f80e1e165ea23ce691e59a47c95666325921abcf5b4",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M002-S02",
+    "path": "scripts/canary_verify.py",
+    "sha": "5e1794042e458a7dfffe5affa343a6f0dea587d016bcc049197a5c7716b27f76",
+    "kind": "added",
+    "round": 4
+  }
+]
