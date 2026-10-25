@@ -93,6 +93,11 @@ and arbitrary command execution are not default RelayForge telemetry features.
 Read that source review only when designing the corresponding contract or later
 experiment; the ten demonstration levels do not expand the admitted scope.
 
+The [session handoff review](session-handoff-source-review-2026-10-25.md) adds one
+measurement boundary: compact continuation views must preserve references while
+leaving failure/cost accounting intact. Record handoff policy and adapter evidence
+coverage so continuation changes are not misattributed to model/effort capability.
+
 ## Foundation slice output
 
 Specify the minimum contracts and compare at most two non-Python toolchain
