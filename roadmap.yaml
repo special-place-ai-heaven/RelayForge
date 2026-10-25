@@ -1,0 +1,69 @@
+schema: frutlups.roadmap/2
+project: relayforge
+brief: 00_brief/
+verification:
+  full: [python, -B, scripts/hermetic_verification.py]
+  focused_default:
+    - [python, -B, scripts/roadmap.py, check]
+  observation: process
+  timeout_seconds: 120
+allowed_prefixes: [02_analysis/, 07_app/, 08_pkg/]
+forbidden:
+  - 00_brief/
+  - 05_governance/
+  - prompts/
+  - questions/answered/
+  - roadmap.yaml
+  - frutlups.toml
+  - AGENTS.md
+  - CLAUDE.md
+review:
+  ordinary: [reviewer]
+  high: [claude_reviewer]
+  release: [reviewer, claude_reviewer]
+milestones:
+  - id: M001
+    title: Native foundation contract and toolchain admission
+    status: active
+    risk: ordinary
+    holistic_review: true
+    slices:
+      - id: M001-S01
+        title: Freeze the native foundation contract
+        objective: >
+          Specify the smallest non-Python core and adapter contracts before
+          admitting a disposable exact-toolchain product canary.
+        acceptance:
+          - Define inventory, route, observation, outcome and reconciliation contracts.
+          - Separate capability facts from measured model-effort-difficulty statistics.
+          - Include tool-call failures, recovery cost, uncertainty and crash recovery.
+          - Compare at most two non-Python toolchains; keep the final decision explicit.
+          - Name the canary, full-check and test-discovery gates for later admission.
+        non_goals:
+          - Product code, dependencies, hooks, services or paid model evaluations.
+          - Changing canonical decisions, foreground models or harness configuration.
+        read_first:
+          - 00_brief/CONTEXT.md
+          - 00_brief/intake.md
+          - 00_brief/constraints.md
+          - 00_brief/decisions.md
+          - 02_analysis/CONTEXT.md
+          - 02_analysis/foundation-brief.md
+        allowed_prefixes: [02_analysis/foundation-contract.md]
+        focused:
+          - [python, -B, scripts/roadmap.py, check]
+        kind: docs
+ruled_out:
+  - id: R1
+    text: Python product runtime; Python remains template workflow tooling only.
+  - id: R2
+    text: Autonomous runner, live hooks, paid benchmarking or publication in initialization.
+not_yet_specified:
+  - id: N1
+    text: Non-Python product language, exact toolchain and disposable canary admission.
+  - id: N2
+    text: Real native harness event payload coverage and dispatch verification.
+  - id: N3
+    text: Model-effort crossovers, calibrated routing thresholds and evaluation budgets.
+  - id: N4
+    text: Product licensing and any later external-code reuse.
