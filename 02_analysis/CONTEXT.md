@@ -18,6 +18,7 @@ lookups; do not load them all or treat their contents as admitted features.
 
 | Need | Read |
 |---|---|
+| Admitted attempt accounting, immutable task context and conservative fixed-baseline comparisons | [accounting-plan.md](accounting-plan.md) |
 | Admitted immutable inventory and eligibility contract, including trusted-state boundary and interim CLI limits | [inventory-plan.md](inventory-plan.md) |
 | Community JEV harness source review: attempt accounting, bound receipts, strict routing, evaluation limits and deferred tool prerequisites | [jev-harness-source-review-2026-10-25.md](jev-harness-source-review-2026-10-25.md) |
 | Existing v4 workflow states, transition guards, recovery and adaptation boundaries | [Workflow graph](../docs/workflow-graph.md) |
