@@ -18,6 +18,7 @@ lookups; do not load them all or treat their contents as admitted features.
 
 | Need | Read |
 |---|---|
+| Pre-packaging license/provenance observations and proposed Q001 exclusion route (not approval) | [distribution-input-observations.md](distribution-input-observations.md) |
 | Admitted attempt accounting, immutable task context and conservative fixed-baseline comparisons | [accounting-plan.md](accounting-plan.md) |
 | Admitted immutable inventory and eligibility contract, including trusted-state boundary and interim CLI limits | [inventory-plan.md](inventory-plan.md) |
 | Community JEV harness source review: attempt accounting, bound receipts, strict routing, evaluation limits and deferred tool prerequisites | [jev-harness-source-review-2026-10-25.md](jev-harness-source-review-2026-10-25.md) |
