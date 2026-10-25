@@ -5,6 +5,10 @@ initialized: read the existing brief and decisions, check the roadmap and ledger
 and resume the reported step through `docs/operating.md`. Do not repeat setup or
 replace project authority on a fresh session. The current owner request and
 recorded decisions bound execution; the product horizon alone does not admit work.
+For the release campaign, D009 delegates progressive slice admission and routine
+technical decisions; D010 selects Rust/SQLite. Read 00_brief/release-contract.md.
+Continue after each milestone until its release gates have evidence. An empty
+admitted queue means plan the next eligible slice, not declare completion.
 
 For a newly extracted template only, populate `00_brief/` from the owner's
 material, replace the example roadmap with modest milestones and narrow slices,

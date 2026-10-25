@@ -3,7 +3,9 @@
 Status: active
 
 This folder owns RelayForge's durable project intent and accepted decisions.
-Read intake.md, constraints.md, and decisions.md during architect initialization.
+Read intake.md, constraints.md, decisions.md, and release-contract.md during
+architect initialization. D009/D010 authorize continuous release delivery and
+delegate routine technical decisions; the foundation is not the finish line.
 For a bounded coder/reviewer task, read only the files named by its generated prompt.
 
 Plan and write boundaries belong to ../roadmap.yaml. Execution history belongs

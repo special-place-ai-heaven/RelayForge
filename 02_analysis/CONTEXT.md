@@ -31,6 +31,7 @@ lookups; do not load them all or treat their contents as admitted features.
 | HN review discussion: confirmed demo version, unversioned anecdotes, and the limits of priority classification | [hn-review-caution-2026-10-25.md](hn-review-caution-2026-10-25.md) |
 
 The imported research is dated 2026-10-25 and is not proof of a current runtime.
-RelayForge has no implemented product yet. The non-Python language and storage
-choices remain undecided; Python is workflow tooling only. Full evidence and
+RelayForge has no implemented product yet. D010 selects Rust 1.99.1 and SQLite;
+earlier source reviews and the accepted foundation preserve their historical
+undecided status. D009 authorizes continued delivery. Python is workflow tooling only. Full evidence and
 specification files are scoped references, not mandatory startup context.

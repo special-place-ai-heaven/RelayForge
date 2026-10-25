@@ -9,7 +9,9 @@ Each constraint records its source and consequence.
   AGENTS.md/CLAUDE.md, use per-folder CONTEXT.md, and declare bounded reads/writes.
   Do not load the whole repository, research, or unrelated inactive workspaces.
 - **Non-Python product.** Source: owner preference. Python remains template
-  workflow tooling only. Product language/toolchain is not silently selected.
+  workflow tooling only. D010 selects Rust 1.99.1 and SQLite; pin versions and
+  verify them through the canary. Python dependency upkeep, rather than Python's
+  usefulness, is the owner's concern.
 - **Codex and Claude first.** Source: owner scope correction. Defer OMP/Cursor
   implementation and HarnessRouter integration until evidence warrants them.
 - **Outcome-driven routing.** Source: owner requirements. Measure exact model +

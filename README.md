@@ -13,9 +13,10 @@ cheaper model at maximum effort; RelayForge must establish that from comparable
 outcomes rather than infer it from model names or advertised token prices.
 
 **Status:** project scaffold and design. No RelayForge runtime, collector, router,
-CLI, or harness integration has been implemented. The product language remains
-undecided and will be non-Python; Rust is a proposal. Python is retained for the
-existing project workflow scripts. No implementation slice has been issued yet.
+CLI, or harness integration has been implemented. The selected product language is
+Rust 1.99.1, with SQLite storage, under D010. Python is retained for the existing
+project workflow scripts. The foundation contract has been accepted; consult
+ledger status for current implementation progress.
 See [environment setup](ENVIRONMENT.md).
 
 ## Intended functionality
@@ -68,9 +69,10 @@ entry point to the same rules.
    role, and writable boundary define that agent's task. The architect records
    the handoff, verification, review, and acceptance through the operating loop.
 
-The initial admission is a foundation contract, not product implementation; use
-ledger status for the current step and the decision register for toolchain and
-later canary authority. A fresh agent can operate the manual loop within scope;
+The [release contract](00_brief/release-contract.md) defines completion. D009
+authorizes the architect to admit successive slices, make routine decisions,
+commit accepted local work and continue through release review. Use ledger status
+for the current step. A fresh agent can operate the manual loop within scope;
 these entry points do not install or qualify an autonomous runner.
 
 The project preserves the folder structure, scripts, and manual `/2` workflow of
@@ -83,8 +85,9 @@ gates in the [upgrade guide](docs/upgrading.md).
 ## Project references
 
 For a fresh session, ask: "Read AGENTS.md and
-prompts/GOAL_RELAYFORGE_BOOTSTRAP.md, then pursue that bounded goal using the
-existing manual loop. Resume from the actual ledger state."
+prompts/GOAL_RELAYFORGE_BOOTSTRAP.md and 00_brief/release-contract.md. Pursue the
+full release campaign, resume from the actual ledger state, and continue after
+each accepted milestone until the release gates are satisfied."
 Use the harness's native goal mechanism if available; mentioning a file alone
 does not activate it. The [workflow graph](docs/workflow-graph.md) maps the
 existing transitions and identifies which optional controls are inactive.

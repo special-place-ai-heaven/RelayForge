@@ -54,6 +54,37 @@ milestones:
         focused:
           - [python, -B, scripts/roadmap.py, check]
         kind: docs
+  - id: M002
+    title: Exact Rust and SQLite canary admission
+    status: active
+    risk: ordinary
+    holistic_review: true
+    slices:
+      - id: M002-S01
+        title: Define the executable canary and release decomposition
+        objective: >
+          Turn selected Rust 1.99.1 and SQLite into an exact bounded canary
+          plan and map release gates to subsequent implementation slices.
+        acceptance:
+          - Specify pinned toolchain, SQLite binding selection evidence and isolated workspace.
+          - Specify exact build, test discovery, full verification and crash/replay checks.
+          - Map release gates G1-G6 to ordered implementation slices with observable acceptance.
+          - Identify architect-owned verifier/runtime setup before issuing product prompts.
+          - State next executable admission and continue campaign after plan acceptance.
+        non_goals:
+          - Product implementation or paid provider calls within this planning slice.
+          - Reopening accepted foundation work or changing release completion criteria.
+        read_first:
+          - 00_brief/CONTEXT.md
+          - 00_brief/constraints.md
+          - 00_brief/decisions.md
+          - 00_brief/release-contract.md
+          - 02_analysis/foundation-contract.md
+          - docs/project_checks.md
+        allowed_prefixes: [02_analysis/canary-plan.md]
+        focused:
+          - [python, -B, scripts/roadmap.py, check]
+        kind: docs
 ruled_out:
   - id: R1
     text: Python product runtime; Python remains template workflow tooling only.
@@ -61,7 +92,7 @@ ruled_out:
     text: Autonomous runner, live hooks, paid benchmarking or publication in initialization.
 not_yet_specified:
   - id: N1
-    text: Non-Python product language, exact toolchain and disposable canary admission.
+    text: Rust 1.99.1 and SQLite selected by D010; executable canary admission follows M002-S01.
   - id: N2
     text: Real native harness event payload coverage and dispatch verification.
   - id: N3

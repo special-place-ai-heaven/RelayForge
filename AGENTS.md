@@ -26,8 +26,12 @@ Run `python -B scripts/roadmap.py check`, `python -B scripts/ledger.py check`,
 `python -B scripts/ledger.py status`, and `git status --short`. Resume the
 reported step under the current request's authority; do not reissue in-progress
 work or infer completion from prose or a prior chat. The roadmap's next slice
-does not admit the whole product horizon. D005 records the setup-only baseline;
-later execution must respect the current run boundary and unresolved decisions.
+does not by itself admit the whole product horizon. D009 now authorizes the
+continuous first-release campaign in `00_brief/release-contract.md`; D010 selects
+Rust and SQLite. Read both before campaign planning. The architect admits the
+next eligible slice whenever release gates remain unmet, and continues after
+each acceptance. Routine technical decisions and local commits are delegated.
+Historical foundation-only limits are superseded as stated in D009/D010.
 Preview an admitted coding prompt with `python -B scripts/prompt.py <slice> --preview`
 before issuance, then follow `docs/operating.md` for the actual loop.
 

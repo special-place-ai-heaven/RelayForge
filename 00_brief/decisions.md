@@ -100,3 +100,48 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
 - Reason: Owner rejects forcing unsuitable components into the project and asks
   to separate grain from chaff, retaining only the most actionable ideas.
 - Supersedes: article-by-article accumulation as the shape of the foundation brief.
+
+
+## D009 — Authorize the first usable release campaign
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: The owner authorizes continuous planning, delegated implementation,
+  verification and review through release-contract.md. The architect admits
+  successive bounded roadmap slices and continues after milestone acceptance,
+  making routine technical choices and local commits without repeated approval.
+  Preserve accepted evidence and the template ledger; external publication,
+  global harness changes and incremental paid evaluation need separate authority.
+- Reason: Owner requests completion of the whole usable product and explicitly
+  delegates technical decisions rather than approving each internal milestone.
+- Supersedes: D005 setup-only execution boundary and the foundation-only stop in
+  the original bootstrap goal. D006 canary-before-product gate remains required.
+  Earlier documents requesting owner selection of routine technical choices
+  defer to this delegation and D010; historical reviewed artifacts remain intact.
+
+## D010 — Select Rust stable 1.99.1 and SQLite
+
+- Status: accepted under owner-delegated technical authority
+- Date: 2026-10-25
+- Decision: Use Rust 1.99.1, target x86_64-pc-windows-msvc initially, for the
+  embeddable core and CLI. Pin the exact toolchain, rustfmt/clippy and dependency
+  lockfile during canary admission. Use SQLite for transactional local events,
+  deduplication and derived statistics. Select and lock a maintained Rust binding
+  with bundled SQLite after inspecting compatibility; record its SQLite version.
+  Prefer transactional append-only event history with rebuildable projections.
+- Evidence: Official stable manifest retrieved 2026-10-25 reports
+  date 2026-10-15, Rust 1.99.1 (58cf8f9c3 2026-10-13):
+  https://static.rust-lang.org/dist/channel-rust-stable.toml
+  SQLite documents atomic transactional crash behavior:
+  https://www.sqlite.org/transactional.html
+- Reason: Native embedding and distribution fit the product; SQLite avoids
+  inventing durable multi-record storage/recovery. The canary must still prove
+  our implementation, chosen settings and Windows build; upstream guarantees
+  do not prove our application works. The observed shell default was 1.98.1,
+  so explicitly provision/select 1.99.1 without changing the global default.
+- Owner preference: Rust is strongly preferred for robustness and maintainability.
+  Python is valued; dependency/environment upkeep is the frustration. Retain
+  existing Python workflow scripts and avoid a Python product runtime.
+- Supersedes: D003 undecided-language status and D006 owner-selection prerequisite.
+  The architect may revise implementation details on evidence within D009; changing
+  product language away from Rust requires owner agreement.
