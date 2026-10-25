@@ -145,3 +145,19 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
 - Supersedes: D003 undecided-language status and D006 owner-selection prerequisite.
   The architect may revise implementation details on evidence within D009; changing
   product language away from Rust requires owner agreement.
+
+## D011 — License RelayForge under PolyForm Noncommercial 1.0.0
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: License original RelayForge work under PolyForm Noncommercial
+  License 1.0.0, using the same license text and owner notice as SymForge:
+  `Required Notice: Copyright (c) 2026 special-place-administrator`.
+  Keep project license metadata and README consistent with the root LICENSE.
+  Preserve imported template materials and third-party dependencies under their
+  original terms and attribution separately; this decision does not relicense
+  them or supply missing upstream permissions. THIRD_PARTY_NOTICES.md records
+  provenance and the separately retained notices available from upstream.
+- Reason: Explicit owner licensing instruction.
+- Supersedes: The unresolved project-license part of roadmap item N4.
+  Future external-code reuse still requires provenance and license review.

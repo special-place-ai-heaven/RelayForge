@@ -157,3 +157,16 @@ Local venvs, caches, credentials, run output, `project.local.toml` and
 `frutlups.local.toml` are ignored. Keep machine paths and secrets out of tracked
 evidence. `docs/project_checks.md` covers runtime selection, required test
 discovery, fresh-process user paths and optional raw-evidence/research guidance.
+
+## License
+
+RelayForge's first-party material is licensed under the [PolyForm Noncommercial
+License 1.0.0](LICENSE), including its required notice. The project was initialized
+from [jequihua/agentic-project-template-v4 at D001's pinned revision](https://github.com/jequihua/agentic-project-template-v4/tree/169a74c66140743008bef374f2c7d0389ee81cb9).
+The pinned source evidence and third-party
+license texts are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+RelayForge's license does not relicense imported template material or third-party
+materials; those remain governed by their respective original terms and notices.
+The template source check found no standalone license file or license grant in
+the checked README and `pyproject.toml`; that observation does not establish
+permission to reuse imported template material.

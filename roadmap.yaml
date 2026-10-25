@@ -98,4 +98,4 @@ not_yet_specified:
   - id: N3
     text: Model-effort crossovers, calibrated routing thresholds and evaluation budgets.
   - id: N4
-    text: Product licensing and any later external-code reuse.
+    text: D011 selects PolyForm Noncommercial 1.0.0 for original RelayForge work; later external-code reuse still requires license and attribution review.
