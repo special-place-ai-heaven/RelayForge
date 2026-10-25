@@ -378,3 +378,22 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   the verified owner Git identity without AI co-author trailers.
 - Handover: delivery-handover-2026-10-25.md records the dated evidence and next
   actions; the roadmap and ledger remain authoritative for execution state.
+
+## D022 — Land the reviewed campaign on main and preserve the older drafts
+
+- Status: accepted
+- Date: 2026-10-25
+- Authority: the owner requested the reviewed campaign on the primary `main`
+  checkout, preservation of all existing dirty work, a non-force push, and safe
+  removal of the fully merged campaign checkout and local branch after checks.
+- Decision: fast-forward `main` through the reviewed campaign commits without
+  rewriting history. Preserve the primary checkout's older dirty files in a
+  named local recovery reference and hash manifest; do not reapply those drafts
+  over accepted files. Use the primary `main` checkout for future navigation.
+  Keep the delivery goal paused and preserve the historical handover evidence.
+- Bounds: no new product slice, ledger-history edit, release claim, packaging,
+  credential inspection, or paid provider experiment follows from this landing. The
+  campaign worktree and branch are removed only after ignored local contents
+  are preserved and the final main push and checks are verified.
+- Evidence: landing-preservation-2026-10-25.md records the Git and recovery
+  identifiers, draft comparison, CI observation and remaining cleanup gates.

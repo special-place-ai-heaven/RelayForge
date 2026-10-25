@@ -14,4 +14,7 @@ Do not duplicate live slice state here.
 
 Dated pause handover: [delivery-handover-2026-10-25.md](delivery-handover-2026-10-25.md)
 summarizes completed work, issue dispositions, evidence and remaining release gaps.
+The [landing preservation report](landing-preservation-2026-10-25.md) identifies
+the current `main` checkout and the saved pre-landing drafts. The delivery goal
+remains paused until the owner resumes it.
 Read actual ledger/Git state before resuming; the handover is not new admission.

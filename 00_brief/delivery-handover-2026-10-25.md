@@ -2,23 +2,22 @@
 
 ## Stop state and access
 
-The owner requested: pause after the current reviewed checkpoint, commit and push,
-and prepare a complete handover. The owner-requested pause awaits the final goal-state
-update after this handover is committed and pushed. Confirm that state before resuming. Do not restart work
-merely because this document exists. Resume only on the owner's instruction.
+The owner requested a pause after the reviewed checkpoint, commit, push and
+handover. That handover reached `577e276`; the delivery goal is paused. Subsequent
+landing housekeeping does not resume it. Resume only on the owner's instruction.
 
 This is a dated navigation and evidence summary, not a replacement for the
 roadmap, decision register or ledger.
 
-- Use the RelayForge-campaign checkout and branch campaign/delivery.
+- Use the primary RelayForge checkout on `main`. The dated landing and original
+  draft recovery details are in [landing-preservation-2026-10-25.md](landing-preservation-2026-10-25.md).
 - Remote: https://github.com/special-place-ai-heaven/RelayForge
 - Last reviewed code checkpoint: M006-S01 accepted at 995ab1396eb3a5e789c4ae523be21924a7f18303; milestone closed and pushed at 09f169c8d1c2c336c0b2e893d43cb65fe78ddc9e.
-- Handover-only commits may follow that checkpoint. Read actual HEAD and status.
-- The sibling RelayForge checkout is on main and intentionally retains an older
-  dirty canary draft, research note, and ledger/prompt artifacts. It is not the
-  current campaign checkout. Do not reset, clean, overwrite or merge it casually.
-- The absolute path to this handover supplied in the final message identifies the
-  correct checkout. Machine-local paths are deliberately absent from this tracked file.
+- The campaign handover was committed at `577e276`; landing housekeeping may
+  follow it. Read actual HEAD, branch, status and ledger before resuming.
+- The older primary canary, research, ledger and prompt drafts were preserved in
+  a named local stash/recovery reference before `main` was fast-forwarded. They
+  remain historical drafts; do not apply them over accepted campaign files.
 - No release package, source archive, installer, release publication or PR was
   created by this campaign. Branch pushes were explicitly authorized.
 
@@ -96,14 +95,15 @@ evidence of native runtime capture or production routing effectiveness.
 - Required discovery gates reject absent required product tests. The authority
   test entrypoint rejects an empty or skipped suite; a missing file fails execution.
 
-Observed GitHub run evidence (the latest checkpoint remains explicitly pending below):
+Observed GitHub run evidence:
 | Source revision | Run | Observed result |
 |---|---|---|
 | e3e30a1 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40213004003 | Windows and all five Linux stages passed; first successful Linux qualification |
 | 65a092c | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40214780155 | M004 closure passed |
 | cecf822 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40216604672 | Inventory slice passed |
 | 579e7e8 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40219234590 | Accounting/M005 closure passed |
-| 09f169c | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223019954 | Queued when observed during handover preparation; completion not yet verified |
+| 09f169c | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223019954 | Windows and all five Linux stages passed; observed after handover preparation |
+| 577e276 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223231330 | Handover commit: Windows and all five Linux stages passed |
 
 Successful qualification observed Windows x86_64-pc-windows-msvc and Linux
 x86_64-unknown-linux-gnu with rustc/Cargo 1.99.1. Windows used CPython 3.11.9;
@@ -133,7 +133,7 @@ configuration and negative-fixture evidence, not a performed live-fork experimen
 | Late UsageCost receipts incorrectly looked like later unresolved work | RESOLVED during M005-S02 implementation; accounting receipts are distinguished from later work. |
 | Missing cohort/profile mismatch and overlapping-interval tests | RESOLVED, M005-S02-001; added table-driven boundaries, discovered by verifier; no production correction was needed. |
 | Formatting, Clippy and new-test discovery failures during development | RESOLVED before final accepted receipts. These were verification/development failures, not silently counted as passing checks. |
-| SymForge connection could select the sibling checkout | OPERATIONAL RISK: earlier wrong-checkout edit was restored. Each worker must select the exact campaign index and confirm status; do not trust another connection's selection. |
+| SymForge connection could select the wrong checkout | OPERATIONAL RISK: earlier wrong-checkout edit was restored. Each worker must select the primary `main` index and confirm status; do not trust another connection's selection. |
 | Native startup metadata is insufficient for the current resolved-identity gate | OPEN DESIGN/INTEGRATION GAP, explained below. No adapter smoke or policy correction has been implemented. |
 | Runtime notices absent at checked minimal-toolchain documentation paths | OPEN DISTRIBUTION INPUT TASK. Obtain verified runtime/standard-library notice inputs; Cargo package metadata alone is not enough. |
 
@@ -265,15 +265,17 @@ files. Preserve template/dependency licenses and attribution separately.
 
 ## Exact resumption steps
 
-1. Obtain the owner's resume instruction, enter the campaign checkout and verify
-   branch/HEAD/status. Preserve the sibling main checkout's unrelated dirty state.
+1. Obtain the owner's resume instruction, enter the primary `main` checkout and
+   verify branch/HEAD/status. Keep the saved pre-landing drafts under their
+   recovery reference; do not reapply them over accepted files.
 2. Follow AGENTS.md architect startup. Run:
    python -B scripts/roadmap.py check
    python -B scripts/ledger.py check
    python -B scripts/ledger.py status
    git status --short
 3. Confirm M001-M006 closure and any pending commit intent from the ledger.
-   Verify https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223019954 or the newest branch run; do not infer success from a push.
+   Verify https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223231330
+   and the newest `main` run; do not infer success from a push.
 4. Read the native adapter findings above and the exact G4 contract. Resolve and
    record the identity/adoption boundary without weakening required evidence.
    D021 is the first real append after the repair; its ledger check is recorded
@@ -290,12 +292,12 @@ configure the owner's global harnesses, or publish artifacts.
 
 ## First prompt for a fresh context
 
-Resume the paused RelayForge full delivery campaign using this handover and the
-campaign/delivery checkout. Act as architect/orchestrator and delegate code to
-task-appropriate model-pinned workers. Read AGENTS.md and its ordered startup
+On the owner's instruction, resume the paused RelayForge full delivery campaign
+using this handover and the primary `main` checkout. Act as architect/orchestrator
+and delegate code to task-appropriate model-pinned workers. Read AGENTS.md and its ordered startup
 files, verify the actual ledger and Git/CI state, then address the native
 identity/adoption boundary and continue the remaining G1-G6 work. Preserve accepted
-evidence and the dirty sibling checkout. Keep Q001 as a packaging/distribution
+evidence and the saved pre-landing drafts. Keep Q001 as a packaging/distribution
 blocker until permission or reviewed exclusion is established. Use the verified
 owner identity, no AI trailers, and non-force pushes after reviewed commits.
 No weekly model quota does not authorize a project provider-spend experiment.
