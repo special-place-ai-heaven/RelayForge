@@ -1,0 +1,60 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M002-S01",
+  "round": 1,
+  "title": "Define the executable canary and release decomposition",
+  "objective": "Turn selected Rust 1.99.1 and SQLite into an exact bounded canary plan and map release gates to subsequent implementation slices.",
+  "acceptance": [
+    "Specify pinned toolchain, SQLite binding selection evidence and isolated workspace.",
+    "Specify exact build, test discovery, full verification and crash/replay checks.",
+    "Map release gates G1-G6 to ordered implementation slices with observable acceptance.",
+    "Identify architect-owned verifier/runtime setup before issuing product prompts.",
+    "State next executable admission and continue campaign after plan acceptance.",
+    "Carry D012 distribution gate into packaging plans; continue independent implementation while Q001 is open."
+  ],
+  "non_goals": [
+    "Product implementation or paid provider calls within this planning slice.",
+    "Reopening accepted foundation work or changing release completion criteria."
+  ],
+  "read_first": [
+    "00_brief/CONTEXT.md",
+    "00_brief/constraints.md",
+    "00_brief/decisions.md",
+    "00_brief/release-contract.md",
+    "02_analysis/foundation-contract.md",
+    "docs/project_checks.md",
+    "questions/open/Q001-template-distribution-permission.md"
+  ],
+  "allowed_prefixes": [
+    "02_analysis/canary-plan.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/roadmap.py",
+      "check"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 120,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}
