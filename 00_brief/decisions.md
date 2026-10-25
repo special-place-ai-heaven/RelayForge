@@ -341,3 +341,22 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   evidence. The S02 envelope and failed-run history remain unchanged. No Linux
   success is inferred before observed checks pass.
 - Supersedes: S01's assumption that rustup already exists on fresh Linux runners.
+
+## D020 — Isolate CI compilation from inherited compiler wrappers
+
+- Status: accepted
+- Date: 2026-10-25
+- Evidence: run 40211448552 on fccb02e again passed Windows. All Linux jobs
+  stopped during provisioning. The formatting job log confirms Rust 1.99.1 was
+  installed, then Cargo could not execute `sccache` as its inherited compiler
+  wrapper (exit 101). The Rustup prerequisite is repaired; Linux checks remain
+  unqualified for this separate environment reason.
+- Decision: M004-S04 sets empty RUSTC_WRAPPER and RUSTC_WORKSPACE_WRAPPER in CI
+  job environments so host wrapper configuration cannot alter the selected
+  compiler path. Preserve host configuration, job-local homes and all existing
+  trust/test gates. Add missing/nonempty-wrapper negative fixtures and a bounded
+  deterministic missing-wrapper versus cleared-wrapper probe.
+- Bounds: no sccache installation, host edits, product changes or new dependency.
+  Review and push the correction, then resume frozen S02 only with actual run
+  evidence. Preserve both failed Linux runs and their successful Windows results.
+- Supersedes: reliance on inherited compiler-wrapper settings in CI jobs only.

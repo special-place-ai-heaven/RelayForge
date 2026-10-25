@@ -217,6 +217,26 @@ milestones:
         focused:
           - [python, -B, scripts/ci_contract_check.py]
         kind: code
+      - id: M004-S04
+        title: Isolate CI jobs from inherited compiler wrappers
+        objective: Correct the observed missing-sccache wrapper failure using job-local environment overrides.
+        acceptance:
+          - CI job environments explicitly clear RUSTC_WRAPPER and RUSTC_WORKSPACE_WRAPPER without modifying host settings or installing wrappers.
+          - Preserve all runner trust, bootstrap checksum, pinned/offline toolchain and existing test gates.
+          - Negative fixtures reject absent or nonempty compiler-wrapper overrides; a bounded probe demonstrates missing-wrapper failure and cleared-wrapper success.
+          - Focused and authoritative full checks pass locally; document run 40211448552 without claiming unobserved Linux success.
+        non_goals:
+          - Product changes, dependency installation, host configuration changes or edits to the frozen S02 evidence envelope.
+        read_first:
+          - 02_analysis/CONTEXT.md
+          - 00_brief/decisions.md
+          - .github/workflows/ci.yml
+          - scripts/ci_contract_check.py
+          - docs/ci.md
+        allowed_prefixes: [.github/workflows/ci.yml, scripts/ci_contract_check.py, docs/ci.md, 02_analysis/ci-results.md]
+        focused:
+          - [python, -B, scripts/ci_contract_check.py]
+        kind: code
       - id: M004-S02
         title: Record actual hosted Windows and fresh Linux qualification
         objective: Qualify the reviewed CI configuration using real runs of the committed source revision.
