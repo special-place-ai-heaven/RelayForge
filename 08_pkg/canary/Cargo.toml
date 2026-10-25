@@ -1,0 +1,17 @@
+[package]
+name = "relayforge-canary"
+version = "0.1.0"
+edition = "2024"
+license = "PolyForm-Noncommercial-1.0.0"
+publish = false
+
+[lib]
+name = "relayforge_canary"
+path = "src/lib.rs"
+
+[[bin]]
+name = "relayforge"
+path = "src/main.rs"
+
+[dependencies]
+rusqlite = { version = "=0.40.0", default-features = false, features = ["bundled"] }

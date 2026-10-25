@@ -1,0 +1,66 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M002-S02",
+  "round": 1,
+  "title": "Qualify native event durability and recovery",
+  "objective": "Implement and execute the disposable Rust 1.99.1 and bundled SQLite canary from the accepted plan before admitting reusable product code.",
+  "acceptance": [
+    "Retain a self-contained library and relayforge canary CLI under 08_pkg/canary with Rust 1.99.1 pin, PolyForm metadata and complete Cargo.lock; use rusqlite exactly 0.40.0 with bundled SQLite 3.53.1.",
+    "Prove toolchain and target versions, locked dependency graph, formatting, warning-free Clippy, all-target build, nonempty discovered and executed unit/integration tests and doctests where declared; all checks offline after explicit dependency provisioning.",
+    "The maintained scripts/canary_verify.py command must fail closed on missing, zero, skipped or failed required tests and include negative self-checks of those guards.",
+    "Materialize the exact candidate Git tree in an isolated clean source directory using an alternate index without changing the real index or HEAD; retain tree and blob identities and execute the maintained full verifier there without recursion.",
+    "Use separate temporary output/database directories and fresh CLI processes to seed records, abort after committed intent, reconcile twice without duplicates, and append failure then verification then acceptance while preserving unknown identity/cost and original failure history.",
+    "Tests prove completion requires both verification and acceptance, capability facts are distinct from observations, duplicate events do not inflate counts, and runtime SQLite is 3.53.1 with bundled feature evidence.",
+    "Verify source/index/HEAD remain unchanged by full verification; bounded scratch cleanup never deletes outside owned scratch; enforce per-process timeouts within the 900-second full check.",
+    "Record portable canary evidence in 02_analysis/canary-results.md including commands, versions, counts, crash exit, snapshot and replay assertions; no secrets, private transcripts, raw runtime stores or machine paths."
+  ],
+  "non_goals": [
+    "Native adapters, real model or tool dispatch, provider calls, packaging, installation or publication.",
+    "Reusing canary as a finished product or claiming G1-G6 release completion."
+  ],
+  "read_first": [
+    "08_pkg/CONTEXT.md",
+    "02_analysis/CONTEXT.md",
+    "00_brief/decisions.md",
+    "00_brief/release-contract.md",
+    "02_analysis/foundation-contract.md",
+    "02_analysis/canary-plan.md",
+    "docs/project_checks.md",
+    "scripts/hermetic_verification.py",
+    "questions/open/Q001-template-distribution-permission.md"
+  ],
+  "allowed_prefixes": [
+    "08_pkg/canary/",
+    "scripts/canary_verify.py",
+    "02_analysis/canary-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/canary_verify.py",
+      "--self-test"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}
