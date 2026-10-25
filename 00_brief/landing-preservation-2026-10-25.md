@@ -20,7 +20,11 @@ change the ledger. Read actual Git, ledger and CI state when work resumes.
   preceding M006 closure [run](https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223019954)
   also completed successfully. At this observation, no PR existed for the
   campaign branch, and GitHub returned no `main` branch protection or ruleset.
-  A new `main` push/run remains to be observed after the landing commit.
+- The landing housekeeping commit `ce84f0031f005fd0eebae9142e0a5727984053d2`
+  was pushed to `main`. Its [CI run](https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40225708817)
+  completed successfully: hosted Windows and all five Linux jobs passed. The
+  run emitted a nonblocking Node 20 checkout warning for later CI maintenance;
+  no workflow change was made in this cleanup.
 
 The maintained `python -B scripts/hermetic_verification.py` completed locally
 after the fast-forward and this housekeeping draft: exit 0 in 134.050 seconds,
@@ -28,7 +32,7 @@ Terminal Commander job `job_01a1747fda1972129cd94f9a92563825`. It reported
 roadmap and ledger checks, clean candidate and unchanged source/index/HEAD;
 canary tests, the CI contract, 17 product unit tests, 15 integration tests and
 one doctest passed. The scoped `git diff --check` on the edited tracked brief
-files also passed. These local checks do not stand in for the new `main` CI run.
+files also passed. The pushed `main` run above supplies separate CI evidence.
 
 ## Primary drafts saved before fast-forward
 
@@ -58,14 +62,26 @@ IDs without restoring the older files to `main`.
 These comparisons describe content relationships, not permission to discard the
 original bytes. The recovery ref and manifest preserve every pre-landing variant.
 
-## Campaign checkout cleanup gate
+## Campaign checkout cleanup
 
-The campaign worktree has clean Git status but contains ignored `.symforge/`
-index data and `target/` Rust build output. Shallow inspection found only a
-tracked `local_state/README.md` under `local_state/`; no local database or raw
-runtime store was observed there. The primary checkout's ignored state was left
-untouched. Before removing the campaign worktree, preserve both ignored
-directories as named external local archive directories, verify their contents,
-then recheck the worktree and merged branch. Do not force removal merely because
-Git status is clean. The campaign checkout and local branch still exist at this
-report's drafting point.
+After the pushed `main` run passed, live remote `main` and local `main` both
+resolved to `ce84f0031f005fd0eebae9142e0a5727984053d2`. The reviewed
+campaign commit `577e276` remained an ancestor; both worktrees were clean.
+The campaign's only ignored top-level directories were `.symforge/` index data
+and `target/` Rust build output. Shallow inspection found only tracked
+`local_state/README.md` under `local_state/`; no local database or raw runtime
+store was observed there. The primary checkout's ignored state was left intact.
+
+Both ignored directories were moved natively into the existing external sibling
+`RelayForge-landing-preservation-20261025` as `campaign-symforge/` and
+`campaign-target/`. The original paths were absent afterward, both destinations
+were directories, their shallow entries matched, and selected shallow file
+SHA-256 digests matched before and after. This was a directory move, not a
+recursive content audit of the build cache.
+
+With no dirty or ignored campaign paths remaining, `git worktree remove`
+completed without force. `git branch -d campaign/delivery` then deleted the
+fully merged local branch. Only the primary `main` worktree remains registered.
+The remote campaign branch was left untouched. The pre-landing stash, recovery
+reference and 13-file manifest remain intact; all 13 saved blobs were verified
+again before cleanup.

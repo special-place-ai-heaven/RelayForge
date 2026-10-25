@@ -13,8 +13,9 @@ roadmap, decision register or ledger.
   draft recovery details are in [landing-preservation-2026-10-25.md](landing-preservation-2026-10-25.md).
 - Remote: https://github.com/special-place-ai-heaven/RelayForge
 - Last reviewed code checkpoint: M006-S01 accepted at 995ab1396eb3a5e789c4ae523be21924a7f18303; milestone closed and pushed at 09f169c8d1c2c336c0b2e893d43cb65fe78ddc9e.
-- The campaign handover was committed at `577e276`; landing housekeeping may
-  follow it. Read actual HEAD, branch, status and ledger before resuming.
+- The campaign handover was committed at `577e276`; its reviewed history landed
+  on `main` and the local campaign checkout was removed after the `ce84f00`
+  push and CI pass. Read actual HEAD, branch, status and ledger before resuming.
 - The older primary canary, research, ledger and prompt drafts were preserved in
   a named local stash/recovery reference before `main` was fast-forwarded. They
   remain historical drafts; do not apply them over accepted campaign files.
@@ -104,6 +105,7 @@ Observed GitHub run evidence:
 | 579e7e8 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40219234590 | Accounting/M005 closure passed |
 | 09f169c | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223019954 | Windows and all five Linux stages passed; observed after handover preparation |
 | 577e276 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223231330 | Handover commit: Windows and all five Linux stages passed |
+| ce84f00 | https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40225708817 | Main landing commit: Windows and all five Linux stages passed |
 
 Successful qualification observed Windows x86_64-pc-windows-msvc and Linux
 x86_64-unknown-linux-gnu with rustc/Cargo 1.99.1. Windows used CPython 3.11.9;
@@ -274,7 +276,7 @@ files. Preserve template/dependency licenses and attribution separately.
    python -B scripts/ledger.py status
    git status --short
 3. Confirm M001-M006 closure and any pending commit intent from the ledger.
-   Verify https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40223231330
+   Verify https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40225708817
    and the newest `main` run; do not infer success from a push.
 4. Read the native adapter findings above and the exact G4 contract. Resolve and
    record the identity/adoption boundary without weakening required evidence.
