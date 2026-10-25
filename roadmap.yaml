@@ -7,7 +7,7 @@ verification:
     - [python, -B, scripts/roadmap.py, check]
   observation: process
   timeout_seconds: 900
-allowed_prefixes: [02_analysis/, 07_app/, 08_pkg/, Cargo.toml, Cargo.lock, rust-toolchain.toml, scripts/canary_verify.py, scripts/product_verify.py, scripts/ci_contract_check.py, scripts/_protocol.py, scripts/_integrity.py, scripts/_evidence.py, scripts/prompt.py, scripts/ledger.py, scripts/hermetic_verification.py, tests/test_authority_history.py, .github/workflows/, docs/ci.md]
+allowed_prefixes: [02_analysis/, 07_app/, 08_pkg/, Cargo.toml, Cargo.lock, rust-toolchain.toml, scripts/canary_verify.py, scripts/product_verify.py, scripts/ci_contract_check.py, scripts/_protocol.py, scripts/_integrity.py, scripts/_evidence.py, scripts/prompt.py, scripts/ledger.py, scripts/hermetic_verification.py, scripts/test_authority_history.py, tests/test_authority_history.py, .github/workflows/, docs/ci.md]
 forbidden:
   - 00_brief/
   - 05_governance/
@@ -331,9 +331,9 @@ milestones:
           - 02_analysis/authority-history-plan.md
           - docs/operating.md
           - docs/upgrading.md
-        allowed_prefixes: [scripts/_protocol.py, scripts/_integrity.py, scripts/_evidence.py, scripts/prompt.py, scripts/ledger.py, scripts/hermetic_verification.py, tests/test_authority_history.py, 02_analysis/authority-history-results.md]
+        allowed_prefixes: [scripts/_protocol.py, scripts/_integrity.py, scripts/_evidence.py, scripts/prompt.py, scripts/ledger.py, scripts/hermetic_verification.py, scripts/test_authority_history.py, tests/test_authority_history.py, 02_analysis/authority-history-results.md]
         focused:
-          - [python, -B, -m, unittest, discover, -s, tests, -p, test_authority_history.py, -v]
+          - [python, -B, scripts/test_authority_history.py]
         kind: code
 ruled_out:
   - id: R1
