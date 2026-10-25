@@ -1,0 +1,62 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M006-S01",
+  "round": 2,
+  "title": "Verify append-only authority against original reachable Git content",
+  "objective": "Allow legitimate decision-register appends without weakening immutable historical evidence or changing past grants.",
+  "acceptance": [
+    "Implement 02_analysis/authority-history-plan.md with no old ledger, report, envelope, hash or decision-text rewrites.",
+    "Only resolution authority may use verified same-path reachable Git content with the recorded hash and exact current-content prefix; return original authority to consumers.",
+    "Tampering, missing provenance and ordinary evidence drift still fail; all integrity and prompt consumers use the same narrow rule.",
+    "Reproduce the original failure first, add nonempty positive/negative integration tests and include them in the maintained full command; full product/canary checks remain passing.",
+    "Record observed behavior and limitations in 02_analysis/authority-history-results.md without changing native product behavior or Q001."
+  ],
+  "non_goals": [
+    "Product changes, new dependencies, global Git changes, general drift bypasses, old evidence rewrites or packaging."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "02_analysis/authority-history-plan.md",
+    "docs/operating.md",
+    "docs/upgrading.md"
+  ],
+  "allowed_prefixes": [
+    "scripts/_protocol.py",
+    "scripts/_integrity.py",
+    "scripts/_evidence.py",
+    "scripts/prompt.py",
+    "scripts/ledger.py",
+    "scripts/hermetic_verification.py",
+    "scripts/test_authority_history.py",
+    "tests/test_authority_history.py",
+    "02_analysis/authority-history-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/test_authority_history.py"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Previous verification failed. Complete receipt: `05_governance/reviews/m006/M006-S01_r1_verification.json` (sha256 `d27183081c8ed21fc0929426f9fe3daacc3a907f08d5eca6da737b771d687f19`)\n\nstdout tail:\n```text\nroadmap: ok\r\nledger: ok\r\nCANDIDATE TREE 7f92f009d837598ed0582507685e51cc206db959 files=343\r\nCOMMAND <absolute-path> check\r\nEXIT 2: <absolute-path> check\r\n\n```\n\nstderr tail:\n```text\nwarning: M002-S02: slice entry exceeds 2 KB\r\nwarning: M003-S01: slice entry exceeds 2 KB\r\nwarning: M004-S01: slice entry exceeds 2 KB\r\ntest_append_only_resolution_passes_artifact_integrity (__main__.AuthorityHistoryTests.test_append_only_resolution_passes_artifact_integrity) ... ok\r\ntest_changed_old_content_and_truncation_fail_both_integrity_paths (__main__.AuthorityHistoryTests.test_changed_old_content_and_truncation_fail_both_integrity_paths) ... ok\r\ntest_missing_file_wrong_hash_and_wrong_path_fail (__main__.AuthorityHistoryTests.test_missing_file_wrong_hash_and_wrong_path_fail) ... ok\r\ntest_normalized_append_preserves_original_grant (__main__.AuthorityHistoryTests.test_normalized_append_preserves_original_grant) ... ok\r\ntest_ordinary_evidence_drift_remains_strict (__main__.AuthorityHistoryTests.test_ordinary_evidence_drift_remains_strict) ... ok\r\ntest_original_on_unreachable_branch_does_not_grant_authority (__main__.AuthorityHistoryTests.test_original_on_unreachable_branch_does_not_grant_authority) ... ok\r\ntest_prompt_receives_original_authority_without_later_decision (__main__.AuthorityHistoryTests.test_prompt_receives_original_authority_without_later_decision) ... ok\r\ntest_unchanged_authority_uses_current_file (__main__.AuthorityHistoryTests.test_unchanged_authority_uses_current_file) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 8 tests in 9.583s\r\n\r\nOK\r\nerror: drift: tests/test_authority_history.py\r\nproduct verification failed: command failed with exit 2: <absolute-path> check\r\nverification command 6 failed: argv=['<absolute-path>', '-B', 'scripts/product_verify.py'] cwd=<repo> exit=1\r\n\n```",
+  "memory": ""
+}

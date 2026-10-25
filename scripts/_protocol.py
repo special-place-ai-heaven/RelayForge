@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -245,6 +246,68 @@ def read_reference(root, ref, limit=2 * 1024 * 1024):
     if memo is not None:
         c.remember("json_evidence", key, copy.deepcopy(value), len(data))
     return value
+
+
+def read_resolution_authority(root, ref, limit=2 * 1024 * 1024):
+    """Return the original normalized authority, never later appended text."""
+    reference(ref)
+    rel = ref["path"]
+    path = c.repo_path(root, rel)
+    message = f"immutable evidence drift: {rel}"
+    need(path.is_file() and not path.is_symlink(), message)
+    identity = c.file_key(path)
+    need(path.stat().st_size <= limit, message)
+    with path.open("rb") as stream:
+        current = stream.read(limit + 1)
+    need(len(current) <= limit and c.file_key(path) == identity, message)
+    normalized_current = current if b"\x00" in current else current.replace(b"\r\n", b"\n")
+    def current_unchanged():
+        with path.open("rb") as stream:
+            return stream.read(limit + 1) == current and c.file_key(path) == identity
+
+    if c.evidence_sha_bytes(current) == ref["sha"]:
+        need(current_unchanged(), message)
+        return normalized_current
+
+    def git(*args):
+        try:
+            return subprocess.run(
+                ["git", "--no-replace-objects", "-C", str(root), *args],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                timeout=5,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise ValueError(message) from exc
+
+    history = git("log", "-n", "256", "--format=%H", "HEAD", "--", rel)
+    need(history.returncode == 0, message)
+    for commit in history.stdout.splitlines():
+        if not re.fullmatch(rb"[0-9a-f]{40}|[0-9a-f]{64}", commit):
+            continue
+        object_name = commit.decode("ascii") + ":" + rel
+        size = git("cat-file", "-s", object_name)
+        if size.returncode:
+            continue
+        try:
+            if not 0 <= int(size.stdout.strip()) <= limit:
+                continue
+        except ValueError:
+            continue
+        original = git("show", object_name)
+        if original.returncode or c.evidence_sha_bytes(original.stdout) != ref["sha"]:
+            continue
+        normalized_original = (
+            original.stdout
+            if b"\x00" in original.stdout
+            else original.stdout.replace(b"\r\n", b"\n")
+        )
+        need(normalized_current.startswith(normalized_original), message)
+        need(current_unchanged(), message)
+        return normalized_original
+    raise ValueError(message)
+
 
 
 def outcome(root, ref, sid, round_no):

@@ -1,0 +1,62 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M006-S01",
+  "round": 3,
+  "title": "Verify append-only authority against original reachable Git content",
+  "objective": "Allow legitimate decision-register appends without weakening immutable historical evidence or changing past grants.",
+  "acceptance": [
+    "Implement 02_analysis/authority-history-plan.md with no old ledger, report, envelope, hash or decision-text rewrites.",
+    "Only resolution authority may use verified same-path reachable Git content with the recorded hash and exact current-content prefix; return original authority to consumers.",
+    "Tampering, missing provenance and ordinary evidence drift still fail; all integrity and prompt consumers use the same narrow rule.",
+    "Reproduce the original failure first, add nonempty positive/negative integration tests and include them in the maintained full command; full product/canary checks remain passing.",
+    "Record observed behavior and limitations in 02_analysis/authority-history-results.md without changing native product behavior or Q001."
+  ],
+  "non_goals": [
+    "Product changes, new dependencies, global Git changes, general drift bypasses, old evidence rewrites or packaging."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "02_analysis/authority-history-plan.md",
+    "docs/operating.md",
+    "docs/upgrading.md"
+  ],
+  "allowed_prefixes": [
+    "scripts/_protocol.py",
+    "scripts/_integrity.py",
+    "scripts/_evidence.py",
+    "scripts/prompt.py",
+    "scripts/ledger.py",
+    "scripts/hermetic_verification.py",
+    "scripts/test_authority_history.py",
+    "tests/test_authority_history.py",
+    "02_analysis/authority-history-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/test_authority_history.py"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Previous verification failed. Complete receipt: `05_governance/reviews/m006/M006-S01_r2_verification.json` (sha256 `deb89f91f9f6e0e9ba15ccdfce956f3fcadac4fb5cffc832a5b5b2fa3ae92aff`)\n\nstdout tail:\n```text\nroadmap: ok\r\nledger: ok\r\nCANDIDATE TREE 80a9b2668e6b520597de3efb6cc1ee9a22394235 files=348\r\nCOMMAND <absolute-path> check\r\nEXIT 0: <absolute-path> check\r\nledger: ok\r\nPRIVATE CANDIDATE LEDGER CHECK PASS: original Git ancestry is visible\r\nCANDIDATE CLEAN PASS: tree=80a9b2668e6b520597de3efb6cc1ee9a22394235; private baseline=f33bdc1dea7daf6653c1bed2ecde4de255820a05; scratch-only metadata/index/objects\r\nCOMMAND <absolute-path>\r\nEXIT 1: <absolute-path>\r\nroadmap: ok\r\nledger: ok\r\n\n```\n\nstderr tail:\n```text\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n======================================================================\r\nERROR: test_normalized_append_preserves_original_grant (__main__.AuthorityHistoryTests.test_normalized_append_preserves_original_grant)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n======================================================================\r\nERROR: test_ordinary_evidence_drift_remains_strict (__main__.AuthorityHistoryTests.test_ordinary_evidence_drift_remains_strict)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n======================================================================\r\nERROR: test_original_on_unreachable_branch_does_not_grant_authority (__main__.AuthorityHistoryTests.test_original_on_unreachable_branch_does_not_grant_authority)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n======================================================================\r\nERROR: test_prompt_receives_original_authority_without_later_decision (__main__.AuthorityHistoryTests.test_prompt_receives_original_authority_without_later_decision)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n======================================================================\r\nERROR: test_unchanged_authority_uses_current_file (__main__.AuthorityHistoryTests.test_unchanged_authority_uses_current_file)\r\n----------------------------------------------------------------------\r\nTraceback (most recent call last):\r\n  File \"<absolute-path>\", line 45, in setUp\r\n    subprocess.run(\r\n  File \"<absolute-path>\", line 571, in run\r\n    raise CalledProcessError(retcode, process.args,\r\nsubprocess.CalledProcessError: Command '['git', '-C', '<absolute-path>', 'commit', '-q', '-m', 'Record original authority']' returned non-zero exit status 1.\r\n\r\n----------------------------------------------------------------------\r\nRan 8 tests in 2.939s\r\n\r\nFAILED (errors=8)\r\nverification command 5 failed: argv=['<absolute-path>', '-B', 'scripts/test_authority_history.py'] cwd=<absolute-path> exit=1\r\nproduct verification failed: command failed with exit 1: <absolute-path>\r\nverification command 6 failed: argv=['<absolute-path>', '-B', 'scripts/product_verify.py'] cwd=<repo> exit=1\r\n\n```",
+  "memory": ""
+}

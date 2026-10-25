@@ -9,6 +9,7 @@ from pathlib import Path
 import _common as c
 import _evidence as evidence
 import _integrity as integrity
+import _protocol as protocol
 import ledger
 import roadmap
 
@@ -208,6 +209,13 @@ def _envelope(root, rm, item, current, events=None):
         context += "\n\nRecorded resolution: " + (
             resolution if isinstance(resolution, str) else _json(resolution)
         )
+    for event in events or ():
+        if event["ev"] != "resolved" or event["scope"] != item["id"]:
+            continue
+        for ref in event["authority"]:
+            original = protocol.read_resolution_authority(root, ref).decode("utf-8")
+            context += "\n\nResolution authority (original cited content): "
+            context += _ref(root, ref["path"], ref["sha"]) + "\n" + original
     return {
         "schema": "frutlups.envelope/2",
         "slice": item["id"],
@@ -430,12 +438,6 @@ def coding(root, sid, allow_dirty=False, *, preview=False, backend="manual"):
                 + "\n"
                 + evidence.read_excerpt(root, current["notes"], 2048)
             )
-    for event in events:
-        if event["ev"] == "resolved" and event["scope"] == sid:
-            authority = "Resolution authority: " + ", ".join(
-                _ref(root, ref["path"], ref["sha"]) for ref in event["authority"]
-            )
-            envelope["findings"] = authority + "\n\n" + envelope["findings"]
     values = _values(envelope)
     values["outcome_contract"] = _finish(backend, sid, current["round"])
     artifacts = []

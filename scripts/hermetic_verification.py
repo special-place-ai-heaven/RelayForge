@@ -18,6 +18,7 @@ COMMANDS: list[object] = [
     ["python", "-B", "scripts/ledger.py", "check"],
     ["git", "diff", "--check"],
     ["git", "diff", "--cached", "--check"],
+    ["python", "-B", "scripts/test_authority_history.py"],
     ["python", "-B", "scripts/product_verify.py"],
 ]
 

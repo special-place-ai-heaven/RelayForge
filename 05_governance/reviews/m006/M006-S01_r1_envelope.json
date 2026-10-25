@@ -1,0 +1,68 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M006-S01",
+  "round": 1,
+  "title": "Verify append-only authority against original reachable Git content",
+  "objective": "Allow legitimate decision-register appends without weakening immutable historical evidence or changing past grants.",
+  "acceptance": [
+    "Implement 02_analysis/authority-history-plan.md with no old ledger, report, envelope, hash or decision-text rewrites.",
+    "Only resolution authority may use verified same-path reachable Git content with the recorded hash and exact current-content prefix; return original authority to consumers.",
+    "Tampering, missing provenance and ordinary evidence drift still fail; all integrity and prompt consumers use the same narrow rule.",
+    "Reproduce the original failure first, add nonempty positive/negative integration tests and include them in the maintained full command; full product/canary checks remain passing.",
+    "Record observed behavior and limitations in 02_analysis/authority-history-results.md without changing native product behavior or Q001."
+  ],
+  "non_goals": [
+    "Product changes, new dependencies, global Git changes, general drift bypasses, old evidence rewrites or packaging."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "02_analysis/authority-history-plan.md",
+    "docs/operating.md",
+    "docs/upgrading.md"
+  ],
+  "allowed_prefixes": [
+    "scripts/_protocol.py",
+    "scripts/_integrity.py",
+    "scripts/_evidence.py",
+    "scripts/prompt.py",
+    "scripts/ledger.py",
+    "scripts/hermetic_verification.py",
+    "tests/test_authority_history.py",
+    "02_analysis/authority-history-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_authority_history.py",
+      "-v"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}

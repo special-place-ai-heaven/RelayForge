@@ -256,7 +256,10 @@ def errors(root, events, rm):
                     projection.add(ref, previous)
                 continue
             for ref in p.event_references(event):
-                _reference(root, ref)
+                if event["ev"] == "resolved" and ref in event["authority"]:
+                    p.read_resolution_authority(root, ref)
+                else:
+                    _reference(root, ref)
             if event["ev"] == "prompt":
                 issued[key] = envelope(root, event["envelope"], sid, event["round"])
             elif event["ev"] == "coded":

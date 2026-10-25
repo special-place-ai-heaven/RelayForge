@@ -462,6 +462,12 @@ def artifact_errors(root, events):
     errors = []
     for event in events:
         for ref in protocol.event_references(event):
+            if event["ev"] == "resolved" and ref in event["authority"]:
+                try:
+                    protocol.read_resolution_authority(root, ref)
+                except (OSError, ValueError):
+                    errors.append(f"drift: {ref['path']}")
+                continue
             path = c.repo_path(root, ref["path"])
             if path.is_symlink() or not path.is_file() or c.sha(path) != ref["sha"]:
                 errors.append(f"drift: {ref['path']}")
