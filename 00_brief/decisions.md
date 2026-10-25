@@ -161,3 +161,20 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
 - Reason: Explicit owner licensing instruction.
 - Supersedes: The unresolved project-license part of roadmap item N4.
   Future external-code reuse still requires provenance and license review.
+
+## D012 — Gate distribution on template permission or proven exclusion
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Track the missing template license grant in
+  ../questions/open/Q001-template-distribution-permission.md as a distribution
+  blocker. Before packaging, establish applicable permission or review packaging
+  inputs that exclude imported and derived template material from distributed
+  artifacts. Inspect resulting artifact contents before distribution. Keep
+  original licenses/notices for included third-party material. Continue
+  independent implementation and verification while this blocker is open.
+- Reason: Explicit owner instruction following D011.
+- Scope: G1 packaging/delivery and G6 release readiness; no permission to publish
+  or contact external parties is implied. The architect owns exclusion evidence;
+  the human owner obtains upstream permission if that route is chosen.
+- Supersedes: Any assumption that repository licensing alone clears distribution.

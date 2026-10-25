@@ -71,6 +71,7 @@ milestones:
           - Map release gates G1-G6 to ordered implementation slices with observable acceptance.
           - Identify architect-owned verifier/runtime setup before issuing product prompts.
           - State next executable admission and continue campaign after plan acceptance.
+          - Carry D012 distribution gate into packaging plans; continue independent implementation while Q001 is open.
         non_goals:
           - Product implementation or paid provider calls within this planning slice.
           - Reopening accepted foundation work or changing release completion criteria.
@@ -81,6 +82,7 @@ milestones:
           - 00_brief/release-contract.md
           - 02_analysis/foundation-contract.md
           - docs/project_checks.md
+          - questions/open/Q001-template-distribution-permission.md
         allowed_prefixes: [02_analysis/canary-plan.md]
         focused:
           - [python, -B, scripts/roadmap.py, check]

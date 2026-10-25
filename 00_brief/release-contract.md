@@ -29,6 +29,14 @@ routing until a separately recorded policy and comparative evidence justify it.
 
 ## Delivery order and admission
 
+D012 adds a mandatory distribution gate to G1 and G6. Before packaging, resolve
+[Q001](../questions/open/Q001-template-distribution-permission.md) by establishing
+an applicable upstream permission grant or reviewing packaging inputs that
+exclude all imported/derived template material. Before distribution, inspect
+every resulting artifact (including any source archives/installers) against that
+evidence. Retain notices for included third-party materials. An open Q001 blocks
+packaging/distribution, not independent implementation or local verification.
+
 1. Preserve accepted foundation evidence and commit attributable baseline work.
 2. Select/pin the toolchain and storage per D010, admit the disposable canary and
    prove build, discovered/executed tests, transactional durability and recovery.
