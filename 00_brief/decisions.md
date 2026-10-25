@@ -210,3 +210,35 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   separately before claiming Linux support; Windows remains the initial target.
 - Reason: Explicit owner runner instruction during the release campaign.
 - Supersedes: None; CI is to be admitted with tests and independent review.
+
+## D015 — Incorporate material JEV source-review lessons at planning boundaries
+
+- Status: accepted
+- Date: 2026-10-25
+- Authority: Owner requested review and inclusion of
+  ../02_analysis/jev-harness-source-review-2026-10-25.md and its CONTEXT index
+  entry after the frozen canary work, without new dependencies or paid experiments.
+- Evidence compared: foundation-contract.md sections Inventory and routing,
+  Observations and outcomes, and Durable events and reconciliation;
+  phase1-spec.md snapshot/decision records, modes and R5-R15, attempt accounting
+  and persistence; release-contract.md G2/G3/G5/G6; accepted M002 canary sources
+  and verification. The canary proves synthetic durability/replay only. It does
+  not implement product accounting, routing, provider decisions or adapters.
+
+| Material finding | Disposition | Consequence for later admission |
+|---|---|---|
+| Every physical attempt, retry, failure and parent repair belongs to logical task cost; requested and observed identity remain distinct; withheld work is not accepted work. | Already covered | Preserve these foundation and phase1 requirements in G2/G6 tests. Canary failure preservation is partial evidence, not completed accounting. |
+| Partial usage must expose a labelled known subtotal while leaving the full total unknown. | Adopt | G3 aggregation and G6 evaluation must test missing components, full retry/rescue chains and distinct cases versus repeated runs. G2 must retain the component observations needed for that accounting. |
+| Versioned snapshots, relevant configuration fingerprints and stale-evidence rejection. | Already covered | Preserve phase1 snapshot/decision contracts and R10; historical evidence remains interpretable without becoming current execution authority. |
+| Replay must compare with an expectation supplied independently by trusted current host state, including relevant dirty workspace state. | Adopt | G3/G5 decision/cache reuse tests change policy/question, catalog/candidates, configuration, model/effort and relevant workspace state. Persist bounded privacy-safe references/digests, not source contents; a receipt cannot provide its own trusted expected binding. Hash consistency is not authentication. |
+| Eligibility precedes ranking/provider choice; recommendations, host adoption, request dispatch and provider confirmation are separate; existing shadow is zero-network and live shadow is separately enabled and non-influential. | Already covered | Preserve foundation gates and phase1 R5-R11. No configured-only fallback, promotion, tool narrowing or provider calls are authorized by this research. |
+| Strict response validation and cancellation must not produce an applied decision or active handoff. | Adopt | G5 tests reject invented candidates, wrong identities, nonfinite/range-invalid values and, when a distribution is returned, missing/extra keys, invalid sum or inconsistent winner. Never silently normalize. Keep abstention, unavailable, invalid and cancelled outcomes distinct; shadow leaves baseline tool exposure unchanged. |
+| Evaluator labels and experiment arms must not leak into worker input. | Adopt | G6 constructs runtime input from an explicit whitelist and tests exclusion. Report rejected/unavailable decisions separately from dispatched work and verified accepted completions. |
+| Tool prerequisite bundles and whole-bundle accounting. | Defer | Revisit only when tool narrowing is admitted. Do not introduce a dependency framework in this campaign merely because the research describes one. |
+| Adopt the upstream harness, pinned model, uncalibrated thresholds or reported savings as RelayForge evidence; persist full source contents in decision receipts. | Reject | Keep the note as attributed optional source research. No upstream tests or savings were reproduced; no dependency, paid experiment, egress/retention expansion or measured capability follows. |
+
+- Execution: incorporate applicable adopted checks into future bounded roadmap
+  slices through the existing v4 manual /2 ledger process. Do not reopen accepted
+  work or alter a frozen envelope. G1-G6 and Q001 remain unchanged.
+- Supersedes: none; these are material refinements of later product acceptance,
+  not a replacement workflow or a new execution queue.

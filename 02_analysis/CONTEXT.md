@@ -18,6 +18,7 @@ lookups; do not load them all or treat their contents as admitted features.
 
 | Need | Read |
 |---|---|
+| Community JEV harness source review: attempt accounting, bound receipts, strict routing, evaluation limits and deferred tool prerequisites | [jev-harness-source-review-2026-10-25.md](jev-harness-source-review-2026-10-25.md) |
 | Existing v4 workflow states, transition guards, recovery and adaptation boundaries | [Workflow graph](../docs/workflow-graph.md) |
 | Bounded input for the initial foundation contract | [foundation-brief.md](foundation-brief.md) |
 | Detailed registry, routing, observation, recovery, and evaluation contracts | Relevant sections of [phase1-spec.md](phase1-spec.md) |
