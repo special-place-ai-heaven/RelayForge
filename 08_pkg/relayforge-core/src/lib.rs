@@ -58,12 +58,29 @@ CREATE TABLE IF NOT EXISTS attempts (
     intent_event_id TEXT NOT NULL,
     selected_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS inventory_snapshots (
+    snapshot_id TEXT PRIMARY KEY,
+    snapshot_json TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_update BEFORE UPDATE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
+CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_delete BEFORE DELETE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
 CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'immutable event'); END;
 CREATE TRIGGER IF NOT EXISTS events_no_delete BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT,'immutable event'); END;
 CREATE TRIGGER IF NOT EXISTS parents_no_update BEFORE UPDATE ON parents BEGIN SELECT RAISE(ABORT,'immutable parent link'); END;
 CREATE TRIGGER IF NOT EXISTS parents_no_delete BEFORE DELETE ON parents BEGIN SELECT RAISE(ABORT,'immutable parent link'); END;
 CREATE TRIGGER IF NOT EXISTS attempts_no_update BEFORE UPDATE ON attempts BEGIN SELECT RAISE(ABORT,'immutable attempt'); END;
 CREATE TRIGGER IF NOT EXISTS attempts_no_delete BEFORE DELETE ON attempts BEGIN SELECT RAISE(ABORT,'immutable attempt'); END;
+";
+
+const INVENTORY_SCHEMA: &str = "
+BEGIN IMMEDIATE;
+CREATE TABLE IF NOT EXISTS inventory_snapshots (
+    snapshot_id TEXT PRIMARY KEY,
+    snapshot_json TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_update BEFORE UPDATE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
+CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_delete BEFORE DELETE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
+COMMIT;
 ";
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -255,6 +272,137 @@ pub enum StoreError {
     Sql(String),
 }
 
+pub const MAX_INVENTORY_BYTES: usize = 1_048_576;
+pub const MAX_INVENTORY_PROFILES: usize = 64;
+pub const MAX_CAPABILITIES_PER_PROFILE: usize = 64;
+
+/// Versioned inventory metadata is declared by a caller and is not proof of runtime state.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InventorySnapshot {
+    pub schema_version: u16,
+    pub snapshot_id: String,
+    pub revision: String,
+    pub policy_version: String,
+    pub created_at: String,
+    pub harness: String,
+    pub harness_version: String,
+    pub adapter: String,
+    pub adapter_version: String,
+    pub runtime_scope: String,
+    pub session_scope: String,
+    pub configuration_fingerprint: String,
+    pub workspace_fingerprint: String,
+    pub profiles: Vec<InventoryProfile>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InventoryProfile {
+    pub profile_id: String,
+    pub revision: String,
+    pub native_role: String,
+    pub model_provider: String,
+    pub configured_model_id: String,
+    pub resolved_model_id: Option<String>,
+    pub resolved_model_version: Option<String>,
+    pub effort: String,
+    pub supported_efforts: Vec<String>,
+    pub capabilities: Vec<CapabilityFact>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CapabilityStatus {
+    Configured,
+    RuntimeConfirmed,
+    Unsupported,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CapabilityFact {
+    pub capability_id: String,
+    pub value: String,
+    pub status: CapabilityStatus,
+    pub source_ref: String,
+    pub observed_at: String,
+    pub expires_at: String,
+    pub profile_revision: String,
+    pub harness_version: String,
+    pub configuration_fingerprint: String,
+    pub runtime_scope: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct EligibilityRequest {
+    pub schema_version: u16,
+    pub request_id: String,
+    pub task_id: String,
+    pub session_id: String,
+    pub snapshot_id: String,
+    pub policy_version: String,
+    pub candidate_profile_ids: Vec<String>,
+    pub execution_path: String,
+    pub selected_profile_id: Option<String>,
+    pub required_capabilities: Vec<RequiredCapability>,
+    pub workload_labels: Vec<WorkloadLabel>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RequiredCapability {
+    pub capability_id: String,
+    pub value: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct WorkloadLabel {
+    pub name: String,
+    pub value: String,
+    pub provenance: String,
+}
+
+/// This is supplied separately by a host integration that owns trustworthy capture.
+/// Matching names and digests are not authentication; G4 adapters must derive these
+/// values independently and observe the runtime before constructing this value.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CurrentState {
+    pub now: String,
+    pub execution_path: String,
+    pub expected_snapshot_id: String,
+    pub policy_version: String,
+    pub harness: String,
+    pub harness_version: String,
+    pub adapter: String,
+    pub adapter_version: String,
+    pub runtime_scope: String,
+    pub session_scope: String,
+    pub configuration_fingerprint: String,
+    pub workspace_fingerprint: String,
+    pub workspace_dirty: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CandidateEligibility {
+    pub profile_id: String,
+    pub eligible: bool,
+    pub reasons: Vec<String>,
+    pub evidence: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct EligibilityResult {
+    pub eligible_profile_ids: Vec<String>,
+    pub candidates: Vec<CandidateEligibility>,
+    pub outcome: String,
+}
+
 impl std::fmt::Display for StoreError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -321,6 +469,8 @@ impl Store {
             connection.pragma_update(None, "synchronous", "FULL")?;
             connection.execute_batch(SCHEMA)?;
             connection.pragma_update(None, "user_version", DATABASE_SCHEMA_VERSION)?;
+        } else {
+            connection.execute_batch(INVENTORY_SCHEMA)?;
         }
         Ok(Self { connection })
     }
@@ -458,6 +608,49 @@ impl Store {
         })
         .collect()
     }
+
+    pub fn import_inventory(&mut self, snapshot: InventorySnapshot) -> Result<bool, StoreError> {
+        validate_snapshot(&snapshot)?;
+        let encoded = serde_json::to_string(&snapshot)
+            .map_err(|_| StoreError::InvalidInput("invalid_inventory"))?;
+        let tx = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)?;
+        let existing: Option<String> = tx
+            .query_row(
+                "SELECT snapshot_json FROM inventory_snapshots WHERE snapshot_id=?1",
+                [&snapshot.snapshot_id],
+                |row| row.get(0),
+            )
+            .optional()?;
+        if let Some(existing) = existing {
+            if existing == encoded {
+                tx.commit()?;
+                return Ok(false);
+            }
+            return Err(StoreError::Conflict("snapshot_identity_reused"));
+        }
+        tx.execute(
+            "INSERT INTO inventory_snapshots(snapshot_id,snapshot_json) VALUES(?1,?2)",
+            params![snapshot.snapshot_id, encoded],
+        )?;
+        tx.commit()?;
+        Ok(true)
+    }
+
+    pub fn inventory(&self, snapshot_id: &str) -> Result<InventorySnapshot, StoreError> {
+        validate_id(snapshot_id)?;
+        let raw: String = self
+            .connection
+            .query_row(
+                "SELECT snapshot_json FROM inventory_snapshots WHERE snapshot_id=?1",
+                [snapshot_id],
+                |row| row.get(0),
+            )
+            .optional()?
+            .ok_or(StoreError::NotFound("inventory_snapshot"))?;
+        serde_json::from_str(&raw).map_err(|_| StoreError::InvalidInput("stored_inventory_invalid"))
+    }
 }
 
 impl EventKind {
@@ -556,6 +749,431 @@ impl EventKind {
             ),
         }
     }
+}
+
+pub fn parse_inventory_bytes(input: &[u8]) -> Result<InventorySnapshot, StoreError> {
+    if input.is_empty() || input.len() > MAX_INVENTORY_BYTES {
+        return Err(StoreError::InvalidInput("inventory_size_out_of_range"));
+    }
+    if json_depth(input) > MAX_JSON_DEPTH {
+        return Err(StoreError::InvalidInput("inventory_too_deep"));
+    }
+    let text = std::str::from_utf8(input)
+        .map_err(|_| StoreError::InvalidInput("invalid_inventory_json"))?;
+    if sensitive(text) {
+        return Err(StoreError::InvalidInput("sensitive_input_rejected"));
+    }
+    let snapshot: InventorySnapshot = serde_json::from_slice(input)
+        .map_err(|_| StoreError::InvalidInput("invalid_inventory_json"))?;
+    validate_snapshot(&snapshot)?;
+    Ok(snapshot)
+}
+
+pub fn parse_eligibility_request_bytes(input: &[u8]) -> Result<EligibilityRequest, StoreError> {
+    if input.is_empty() || input.len() > MAX_INVENTORY_BYTES {
+        return Err(StoreError::InvalidInput("request_size_out_of_range"));
+    }
+    if json_depth(input) > MAX_JSON_DEPTH {
+        return Err(StoreError::InvalidInput("request_too_deep"));
+    }
+    let text =
+        std::str::from_utf8(input).map_err(|_| StoreError::InvalidInput("invalid_request_json"))?;
+    if sensitive(text) {
+        return Err(StoreError::InvalidInput("sensitive_input_rejected"));
+    }
+    let request: EligibilityRequest = serde_json::from_slice(input)
+        .map_err(|_| StoreError::InvalidInput("invalid_request_json"))?;
+    validate_request(&request)?;
+    Ok(request)
+}
+
+fn safe_text(value: &str, max: usize) -> Result<(), StoreError> {
+    validate_text(value, max)?;
+    if sensitive(value) {
+        return Err(StoreError::InvalidInput("sensitive_input_rejected"));
+    }
+    Ok(())
+}
+
+fn valid_timestamp(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    if bytes.len() != 20
+        || bytes[4] != b'-'
+        || bytes[7] != b'-'
+        || bytes[10] != b'T'
+        || bytes[13] != b':'
+        || bytes[16] != b':'
+        || bytes[19] != b'Z'
+    {
+        return false;
+    }
+    let digits = [0..4, 5..7, 8..10, 11..13, 14..16, 17..19];
+    if digits
+        .iter()
+        .any(|r| !bytes[r.clone()].iter().all(u8::is_ascii_digit))
+    {
+        return false;
+    }
+    let num = |r: std::ops::Range<usize>| value[r].parse::<u32>().unwrap_or(0);
+    let (year, month, day, hour, minute, second) = (
+        num(0..4),
+        num(5..7),
+        num(8..10),
+        num(11..13),
+        num(14..16),
+        num(17..19),
+    );
+    let leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days = match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 if leap => 29,
+        2 => 28,
+        _ => 0,
+    };
+    year > 0 && (1..=days).contains(&day) && hour < 24 && minute < 60 && second < 60
+}
+
+fn valid_reference(value: &str) -> bool {
+    !value.starts_with('/')
+        && !value.starts_with('~')
+        && !value.contains('\\')
+        && !value.contains("://")
+        && !value.as_bytes().get(1).is_some_and(|b| *b == b':')
+        && value
+            .split('/')
+            .all(|part| !part.is_empty() && part != "." && part != "..")
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"._:/-".contains(&b))
+}
+
+fn validate_inventory_id(value: &str) -> Result<(), StoreError> {
+    validate_id(value)?;
+    if sensitive(value) {
+        return Err(StoreError::InvalidInput("sensitive_input_rejected"));
+    }
+    Ok(())
+}
+
+fn validate_snapshot(snapshot: &InventorySnapshot) -> Result<(), StoreError> {
+    if snapshot.schema_version != 1 {
+        return Err(StoreError::UnsupportedSchema);
+    }
+    validate_inventory_id(&snapshot.snapshot_id)?;
+    for value in [
+        &snapshot.revision,
+        &snapshot.policy_version,
+        &snapshot.harness,
+        &snapshot.harness_version,
+        &snapshot.adapter,
+        &snapshot.adapter_version,
+        &snapshot.runtime_scope,
+        &snapshot.session_scope,
+        &snapshot.configuration_fingerprint,
+        &snapshot.workspace_fingerprint,
+    ] {
+        safe_text(value, 256)?;
+    }
+    if !valid_timestamp(&snapshot.created_at)
+        || snapshot.profiles.is_empty()
+        || snapshot.profiles.len() > MAX_INVENTORY_PROFILES
+    {
+        return Err(StoreError::InvalidInput("invalid_inventory_bounds"));
+    }
+    let mut profile_ids = std::collections::BTreeSet::new();
+    for profile in &snapshot.profiles {
+        validate_inventory_id(&profile.profile_id)?;
+        if !profile_ids.insert(&profile.profile_id) {
+            return Err(StoreError::InvalidInput("duplicate_profile"));
+        }
+        for value in [
+            &profile.revision,
+            &profile.native_role,
+            &profile.model_provider,
+            &profile.configured_model_id,
+            &profile.effort,
+        ] {
+            safe_text(value, 256)?;
+        }
+        if profile.resolved_model_id.is_some() != profile.resolved_model_version.is_some() {
+            return Err(StoreError::InvalidInput("incomplete_resolved_identity"));
+        }
+        for value in [&profile.resolved_model_id, &profile.resolved_model_version]
+            .into_iter()
+            .flatten()
+        {
+            safe_text(value, 256)?;
+        }
+        if profile.supported_efforts.is_empty() || profile.supported_efforts.len() > 32 {
+            return Err(StoreError::InvalidInput("invalid_efforts"));
+        }
+        let mut efforts = std::collections::BTreeSet::new();
+        for effort in &profile.supported_efforts {
+            safe_text(effort, 64)?;
+            if !efforts.insert(effort) {
+                return Err(StoreError::InvalidInput("duplicate_effort"));
+            }
+        }
+        if profile.capabilities.len() > MAX_CAPABILITIES_PER_PROFILE {
+            return Err(StoreError::InvalidInput("too_many_capabilities"));
+        }
+        let mut capability_ids = std::collections::BTreeSet::new();
+        for capability in &profile.capabilities {
+            validate_inventory_id(&capability.capability_id)?;
+            if !capability_ids.insert(&capability.capability_id) {
+                return Err(StoreError::InvalidInput("duplicate_capability"));
+            }
+            for value in [
+                &capability.value,
+                &capability.profile_revision,
+                &capability.harness_version,
+                &capability.configuration_fingerprint,
+                &capability.runtime_scope,
+            ] {
+                safe_text(value, 256)?;
+            }
+            if !valid_reference(&capability.source_ref)
+                || sensitive(&capability.source_ref)
+                || !valid_timestamp(&capability.observed_at)
+                || !valid_timestamp(&capability.expires_at)
+                || capability.expires_at <= capability.observed_at
+            {
+                return Err(StoreError::InvalidInput("invalid_capability_evidence"));
+            }
+        }
+    }
+    let encoded =
+        serde_json::to_vec(snapshot).map_err(|_| StoreError::InvalidInput("invalid_inventory"))?;
+    if encoded.len() > MAX_INVENTORY_BYTES || json_depth(&encoded) > MAX_JSON_DEPTH {
+        return Err(StoreError::InvalidInput("inventory_size_out_of_range"));
+    }
+    Ok(())
+}
+
+fn validate_request(request: &EligibilityRequest) -> Result<(), StoreError> {
+    if request.schema_version != 1 {
+        return Err(StoreError::UnsupportedSchema);
+    }
+    for value in [
+        &request.request_id,
+        &request.task_id,
+        &request.session_id,
+        &request.snapshot_id,
+    ] {
+        validate_inventory_id(value)?;
+    }
+    safe_text(&request.policy_version, 256)?;
+    safe_text(&request.execution_path, 256)?;
+    if request.candidate_profile_ids.is_empty()
+        || request.candidate_profile_ids.len() > MAX_INVENTORY_PROFILES
+        || request.required_capabilities.len() > MAX_CAPABILITIES_PER_PROFILE
+        || request.workload_labels.len() > 64
+    {
+        return Err(StoreError::InvalidInput("request_bounds_out_of_range"));
+    }
+    if let Some(selected) = &request.selected_profile_id {
+        validate_inventory_id(selected)?;
+    }
+    let mut candidates = std::collections::BTreeSet::new();
+    for candidate in &request.candidate_profile_ids {
+        validate_inventory_id(candidate)?;
+        if !candidates.insert(candidate) {
+            return Err(StoreError::InvalidInput("duplicate_candidate"));
+        }
+    }
+    let mut requirements = std::collections::BTreeSet::new();
+    for required in &request.required_capabilities {
+        validate_inventory_id(&required.capability_id)?;
+        safe_text(&required.value, 256)?;
+        if !requirements.insert((&required.capability_id, &required.value)) {
+            return Err(StoreError::InvalidInput("duplicate_requirement"));
+        }
+    }
+    for label in &request.workload_labels {
+        safe_text(&label.name, 128)?;
+        safe_text(&label.value, 256)?;
+        safe_text(&label.provenance, 256)?;
+    }
+    Ok(())
+}
+
+/// Evaluate only against a separately supplied host state. API callers own trustworthy capture.
+pub fn evaluate_eligibility(
+    snapshot: &InventorySnapshot,
+    request: &EligibilityRequest,
+    current: Option<&CurrentState>,
+) -> Result<EligibilityResult, StoreError> {
+    validate_snapshot(snapshot)?;
+    validate_request(request)?;
+    if request.snapshot_id != snapshot.snapshot_id {
+        return Err(StoreError::Conflict("snapshot_request_mismatch"));
+    }
+    let by_id: std::collections::BTreeMap<_, _> = snapshot
+        .profiles
+        .iter()
+        .map(|p| (p.profile_id.as_str(), p))
+        .collect();
+    let selected_unknown = request
+        .selected_profile_id
+        .as_deref()
+        .is_some_and(|id| !by_id.contains_key(id));
+    let mut ids = request.candidate_profile_ids.clone();
+    if let Some(selected) = &request.selected_profile_id {
+        ids = vec![selected.clone()];
+    }
+    ids.sort();
+    let mut candidates = Vec::with_capacity(ids.len());
+    for id in ids {
+        let Some(profile) = by_id.get(id.as_str()) else {
+            candidates.push(CandidateEligibility {
+                profile_id: id,
+                eligible: false,
+                reasons: vec![
+                    if selected_unknown {
+                        "unknown_selected_profile"
+                    } else {
+                        "unknown_candidate_profile"
+                    }
+                    .into(),
+                ],
+                evidence: Vec::new(),
+            });
+            continue;
+        };
+        let mut reasons = Vec::new();
+        let mut evidence = Vec::new();
+        let Some(state) = current else {
+            reasons.push("missing_current_state".into());
+            candidates.push(CandidateEligibility {
+                profile_id: id,
+                eligible: false,
+                reasons,
+                evidence,
+            });
+            continue;
+        };
+        if !valid_timestamp(&state.now) {
+            return Err(StoreError::InvalidInput("invalid_current_time"));
+        }
+        if state.expected_snapshot_id != snapshot.snapshot_id {
+            reasons.push("snapshot_mismatch".into());
+        }
+        if state.now < snapshot.created_at {
+            reasons.push("snapshot_from_future".into());
+        }
+        if state.execution_path != request.execution_path {
+            reasons.push("execution_path_mismatch".into());
+        }
+        if state.policy_version != snapshot.policy_version
+            || request.policy_version != snapshot.policy_version
+        {
+            reasons.push("policy_mismatch".into());
+        }
+        if state.harness != snapshot.harness || state.harness_version != snapshot.harness_version {
+            reasons.push("harness_mismatch".into());
+        }
+        if state.adapter != snapshot.adapter || state.adapter_version != snapshot.adapter_version {
+            reasons.push("adapter_mismatch".into());
+        }
+        if state.runtime_scope != snapshot.runtime_scope
+            || state.session_scope != snapshot.session_scope
+            || request.session_id != snapshot.session_scope
+        {
+            reasons.push("runtime_scope_mismatch".into());
+        }
+        if state.configuration_fingerprint != snapshot.configuration_fingerprint {
+            reasons.push("configuration_mismatch".into());
+        }
+        if state.workspace_dirty {
+            reasons.push("workspace_dirty".into());
+        } else if state.workspace_fingerprint != snapshot.workspace_fingerprint {
+            reasons.push("workspace_mismatch".into());
+        }
+        if profile.resolved_model_id.is_none() || profile.resolved_model_version.is_none() {
+            reasons.push("unknown_execution_identity".into());
+        }
+        if !profile.supported_efforts.contains(&profile.effort) {
+            reasons.push("unsupported_effort".into());
+        }
+        for required in &request.required_capabilities {
+            let facts: Vec<_> = profile
+                .capabilities
+                .iter()
+                .filter(|fact| {
+                    fact.capability_id == required.capability_id && fact.value == required.value
+                })
+                .collect();
+            let mut accepted = false;
+            let mut requirement_reason = None;
+            for fact in facts {
+                if fact.profile_revision != profile.revision
+                    || fact.harness_version != state.harness_version
+                    || fact.configuration_fingerprint != state.configuration_fingerprint
+                    || fact.runtime_scope != state.runtime_scope
+                {
+                    requirement_reason = Some("unresolved_scope_mismatch");
+                    continue;
+                }
+                if fact.observed_at > state.now {
+                    requirement_reason = Some("unresolved_future_evidence");
+                    continue;
+                }
+                if fact.expires_at <= state.now {
+                    requirement_reason = Some("unresolved_stale_evidence");
+                    continue;
+                }
+                if fact.status == CapabilityStatus::Unsupported {
+                    requirement_reason = Some("excluded_unsupported");
+                    continue;
+                }
+                if fact.status == CapabilityStatus::Configured {
+                    requirement_reason = Some("unresolved_configured_only");
+                    continue;
+                }
+                if fact.status != CapabilityStatus::RuntimeConfirmed {
+                    requirement_reason.get_or_insert("unresolved_unknown_evidence");
+                    continue;
+                }
+                accepted = true;
+                evidence.push(fact.source_ref.clone());
+                break;
+            }
+            if !accepted {
+                reasons.push(
+                    requirement_reason
+                        .unwrap_or("unresolved_missing_evidence")
+                        .into(),
+                );
+            }
+        }
+        reasons.sort();
+        reasons.dedup();
+        evidence.sort();
+        evidence.dedup();
+        candidates.push(CandidateEligibility {
+            eligible: reasons.is_empty(),
+            profile_id: id,
+            reasons,
+            evidence,
+        });
+    }
+    let eligible_profile_ids: Vec<_> = candidates
+        .iter()
+        .filter(|c| c.eligible)
+        .map(|c| c.profile_id.clone())
+        .collect();
+    let outcome = if eligible_profile_ids.is_empty() {
+        "no_eligible_candidate"
+    } else {
+        "eligible_candidates"
+    }
+    .to_owned();
+    Ok(EligibilityResult {
+        eligible_profile_ids,
+        candidates,
+        outcome,
+    })
 }
 
 fn validate_event(event: &Event) -> Result<(), StoreError> {
@@ -1159,6 +1777,372 @@ fn apply_claim(tx: &Transaction<'_>, event: &Event) -> Result<(), StoreError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn sample_snapshot(status: CapabilityStatus) -> InventorySnapshot {
+        InventorySnapshot {
+            schema_version: 1,
+            snapshot_id: "snap-a".into(),
+            revision: "rev-a".into(),
+            policy_version: "policy-a".into(),
+            created_at: "2026-10-25T10:00:00Z".into(),
+            harness: "codex".into(),
+            harness_version: "1".into(),
+            adapter: "native".into(),
+            adapter_version: "1".into(),
+            runtime_scope: "runtime-a".into(),
+            session_scope: "session-a".into(),
+            configuration_fingerprint: "config-a".into(),
+            workspace_fingerprint: "workspace-a".into(),
+            profiles: vec![InventoryProfile {
+                profile_id: "profile-a".into(),
+                revision: "profile-rev-a".into(),
+                native_role: "worker".into(),
+                model_provider: "provider-a".into(),
+                configured_model_id: "alias-a".into(),
+                resolved_model_id: Some("model-a".into()),
+                resolved_model_version: Some("version-a".into()),
+                effort: "high".into(),
+                supported_efforts: vec!["high".into()],
+                capabilities: vec![CapabilityFact {
+                    capability_id: "cap-a".into(),
+                    value: "value-a".into(),
+                    status,
+                    source_ref: "evidence/cap-a".into(),
+                    observed_at: "2026-10-25T10:00:00Z".into(),
+                    expires_at: "2026-10-26T10:00:00Z".into(),
+                    profile_revision: "profile-rev-a".into(),
+                    harness_version: "1".into(),
+                    configuration_fingerprint: "config-a".into(),
+                    runtime_scope: "runtime-a".into(),
+                }],
+            }],
+        }
+    }
+
+    fn sample_request() -> EligibilityRequest {
+        EligibilityRequest {
+            schema_version: 1,
+            request_id: "request-a".into(),
+            task_id: "task-a".into(),
+            session_id: "session-a".into(),
+            snapshot_id: "snap-a".into(),
+            policy_version: "policy-a".into(),
+            candidate_profile_ids: vec!["profile-a".into()],
+            execution_path: "native".into(),
+            selected_profile_id: None,
+            required_capabilities: vec![RequiredCapability {
+                capability_id: "cap-a".into(),
+                value: "value-a".into(),
+            }],
+            workload_labels: vec![WorkloadLabel {
+                name: "unknown-label".into(),
+                value: "preserved".into(),
+                provenance: "user".into(),
+            }],
+        }
+    }
+
+    fn sample_current() -> CurrentState {
+        CurrentState {
+            now: "2026-10-25T11:00:00Z".into(),
+            execution_path: "native".into(),
+            expected_snapshot_id: "snap-a".into(),
+            policy_version: "policy-a".into(),
+            harness: "codex".into(),
+            harness_version: "1".into(),
+            adapter: "native".into(),
+            adapter_version: "1".into(),
+            runtime_scope: "runtime-a".into(),
+            session_scope: "session-a".into(),
+            configuration_fingerprint: "config-a".into(),
+            workspace_fingerprint: "workspace-a".into(),
+            workspace_dirty: false,
+        }
+    }
+
+    #[test]
+    fn inventory_schema_size_privacy_and_duplicate_keys_are_rejected() {
+        let snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        let bytes = serde_json::to_vec(&snapshot).unwrap();
+        assert_eq!(parse_inventory_bytes(&bytes).unwrap(), snapshot);
+        let mut unknown: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        unknown["unrecognized"] = serde_json::json!("x");
+        assert!(parse_inventory_bytes(&serde_json::to_vec(&unknown).unwrap()).is_err());
+        let oversized = vec![b' '; MAX_INVENTORY_BYTES + 1];
+        assert!(parse_inventory_bytes(&oversized).is_err());
+        let mut duplicate = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        duplicate.profiles.push(duplicate.profiles[0].clone());
+        assert!(validate_snapshot(&duplicate).is_err());
+        let mut private = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        private.profiles[0].configured_model_id = "password-fixture".into();
+        assert!(validate_snapshot(&private).is_err());
+        let mut invalid_date = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        invalid_date.created_at = "2026-02-31T10:00:00Z".into();
+        assert!(validate_snapshot(&invalid_date).is_err());
+        let mut absolute_reference = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        absolute_reference.profiles[0].capabilities[0].source_ref = "C:/private/evidence".into();
+        assert!(validate_snapshot(&absolute_reference).is_err());
+    }
+
+    #[test]
+    fn inventory_import_replay_conflict_and_reopen_are_immutable() {
+        let mut store = Store::memory().unwrap();
+        let snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        assert!(store.import_inventory(snapshot.clone()).unwrap());
+        assert!(!store.import_inventory(snapshot.clone()).unwrap());
+        let mut changed = snapshot.clone();
+        changed.revision = "rev-b".into();
+        assert_eq!(
+            store.import_inventory(changed),
+            Err(StoreError::Conflict("snapshot_identity_reused"))
+        );
+        assert_eq!(store.inventory("snap-a").unwrap(), snapshot);
+        let count: i64 = store
+            .connection
+            .query_row("SELECT count(*) FROM inventory_snapshots", [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        assert_eq!(count, 1);
+
+        let existing = Connection::open_in_memory().unwrap();
+        existing
+            .execute_batch(
+                "CREATE TABLE events(event_id TEXT); INSERT INTO events VALUES('retained');",
+            )
+            .unwrap();
+        existing
+            .pragma_update(None, "user_version", DATABASE_SCHEMA_VERSION)
+            .unwrap();
+        let migrated = Store::from_connection(existing).unwrap();
+        let retained: String = migrated
+            .connection
+            .query_row("SELECT event_id FROM events", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(retained, "retained");
+    }
+
+    #[test]
+    fn eligibility_requires_separate_current_state_and_exact_confirmed_scope() {
+        let snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        let request = sample_request();
+        let missing = evaluate_eligibility(&snapshot, &request, None).unwrap();
+        assert_eq!(missing.candidates[0].reasons, vec!["missing_current_state"]);
+        let result = evaluate_eligibility(&snapshot, &request, Some(&sample_current())).unwrap();
+        assert_eq!(result.eligible_profile_ids, vec!["profile-a"]);
+        assert_eq!(result.candidates[0].evidence, vec!["evidence/cap-a"]);
+    }
+
+    #[test]
+    fn capability_statuses_and_evidence_freshness_have_explicit_reasons() {
+        for (status, expected) in [
+            (CapabilityStatus::Configured, "unresolved_configured_only"),
+            (CapabilityStatus::Unsupported, "excluded_unsupported"),
+            (CapabilityStatus::Unknown, "unresolved_unknown_evidence"),
+        ] {
+            let snapshot = sample_snapshot(status);
+            let result =
+                evaluate_eligibility(&snapshot, &sample_request(), Some(&sample_current()))
+                    .unwrap();
+            assert_eq!(result.candidates[0].reasons, vec![expected]);
+        }
+        let mut stale = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        stale.profiles[0].capabilities[0].expires_at = "2026-10-25T11:00:00Z".into();
+        let result =
+            evaluate_eligibility(&stale, &sample_request(), Some(&sample_current())).unwrap();
+        assert_eq!(
+            result.candidates[0].reasons,
+            vec!["unresolved_stale_evidence"]
+        );
+        let mut future = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        future.profiles[0].capabilities[0].observed_at = "2026-10-25T12:00:00Z".into();
+        let result =
+            evaluate_eligibility(&future, &sample_request(), Some(&sample_current())).unwrap();
+        assert_eq!(
+            result.candidates[0].reasons,
+            vec!["unresolved_future_evidence"]
+        );
+    }
+
+    #[test]
+    fn capability_statuses_require_applicability_before_classification() {
+        let statuses = [
+            (
+                CapabilityStatus::Configured,
+                Some("unresolved_configured_only"),
+            ),
+            (CapabilityStatus::Unsupported, Some("excluded_unsupported")),
+            (
+                CapabilityStatus::Unknown,
+                Some("unresolved_unknown_evidence"),
+            ),
+            (CapabilityStatus::RuntimeConfirmed, None),
+        ];
+        for (status, status_reason) in statuses {
+            let applicable = sample_snapshot(status);
+            let baseline =
+                evaluate_eligibility(&applicable, &sample_request(), Some(&sample_current()))
+                    .unwrap();
+            if let Some(reason) = status_reason {
+                assert_eq!(baseline.candidates[0].reasons, vec![reason]);
+            } else {
+                assert!(baseline.candidates[0].eligible);
+            }
+
+            for mismatch in [
+                "profile_revision",
+                "harness_version",
+                "configuration_fingerprint",
+                "runtime_scope",
+            ] {
+                let mut snapshot = sample_snapshot(status);
+                let fact = &mut snapshot.profiles[0].capabilities[0];
+                match mismatch {
+                    "profile_revision" => fact.profile_revision = "other-revision".into(),
+                    "harness_version" => fact.harness_version = "other-harness".into(),
+                    "configuration_fingerprint" => {
+                        fact.configuration_fingerprint = "other-config".into()
+                    }
+                    "runtime_scope" => fact.runtime_scope = "other-runtime".into(),
+                    _ => unreachable!(),
+                }
+                let result =
+                    evaluate_eligibility(&snapshot, &sample_request(), Some(&sample_current()))
+                        .unwrap();
+                assert!(
+                    result.candidates[0]
+                        .reasons
+                        .contains(&"unresolved_scope_mismatch".into()),
+                    "status {status:?} mismatch {mismatch}"
+                );
+                if let Some(reason) = status_reason {
+                    assert!(!result.candidates[0].reasons.contains(&reason.into()));
+                }
+            }
+
+            let mut future = sample_snapshot(status);
+            future.profiles[0].capabilities[0].observed_at = "2026-10-25T12:00:00Z".into();
+            future.profiles[0].capabilities[0].expires_at = "2026-10-25T13:00:00Z".into();
+            let result =
+                evaluate_eligibility(&future, &sample_request(), Some(&sample_current())).unwrap();
+            assert!(
+                result.candidates[0]
+                    .reasons
+                    .contains(&"unresolved_future_evidence".into()),
+                "status {status:?} future observation"
+            );
+            if let Some(reason) = status_reason {
+                assert!(!result.candidates[0].reasons.contains(&reason.into()));
+            }
+
+            let mut stale = sample_snapshot(status);
+            stale.profiles[0].capabilities[0].expires_at = "2026-10-25T11:00:00Z".into();
+            let result =
+                evaluate_eligibility(&stale, &sample_request(), Some(&sample_current())).unwrap();
+            assert!(
+                result.candidates[0]
+                    .reasons
+                    .contains(&"unresolved_stale_evidence".into()),
+                "status {status:?} stale expiry"
+            );
+            if let Some(reason) = status_reason {
+                assert!(!result.candidates[0].reasons.contains(&reason.into()));
+            }
+        }
+    }
+
+    #[test]
+    fn eligibility_rejects_stale_state_dirty_workspace_and_never_substitutes_selection() {
+        let snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        let mut current = sample_current();
+        current.configuration_fingerprint = "different".into();
+        current.workspace_dirty = true;
+        let mut request = sample_request();
+        request.selected_profile_id = Some("unknown-profile".into());
+        let result = evaluate_eligibility(&snapshot, &request, Some(&current)).unwrap();
+        assert_eq!(result.candidates.len(), 1);
+        assert_eq!(result.candidates[0].profile_id, "unknown-profile");
+        assert_eq!(
+            result.candidates[0].reasons,
+            vec!["unknown_selected_profile"]
+        );
+        let mut request = sample_request();
+        request.candidate_profile_ids.push("profile-b".into());
+        let mut multi = snapshot.clone();
+        let mut second = multi.profiles[0].clone();
+        second.profile_id = "profile-b".into();
+        second.revision = "profile-rev-b".into();
+        second.capabilities[0].profile_revision = "profile-rev-b".into();
+        multi.profiles.push(second);
+        let result = evaluate_eligibility(&multi, &request, Some(&sample_current())).unwrap();
+        assert_eq!(
+            result
+                .candidates
+                .iter()
+                .map(|candidate| candidate.profile_id.as_str())
+                .collect::<Vec<_>>(),
+            vec!["profile-a", "profile-b"]
+        );
+        request.candidate_profile_ids.reverse();
+        assert_eq!(
+            result,
+            evaluate_eligibility(&multi, &request, Some(&sample_current())).unwrap()
+        );
+
+        let mut configured = sample_snapshot(CapabilityStatus::Configured);
+        let mut eligible_alternative = configured.profiles[0].clone();
+        eligible_alternative.profile_id = "profile-b".into();
+        eligible_alternative.revision = "profile-rev-b".into();
+        eligible_alternative.capabilities[0].status = CapabilityStatus::RuntimeConfirmed;
+        eligible_alternative.capabilities[0].profile_revision = "profile-rev-b".into();
+        configured.profiles.push(eligible_alternative);
+        let mut selected = sample_request();
+        selected.selected_profile_id = Some("profile-a".into());
+        selected.candidate_profile_ids.push("profile-b".into());
+        let selected_result =
+            evaluate_eligibility(&configured, &selected, Some(&sample_current())).unwrap();
+        assert_eq!(selected_result.candidates.len(), 1);
+        assert_eq!(selected_result.candidates[0].profile_id, "profile-a");
+        assert_eq!(
+            selected_result.candidates[0].reasons,
+            vec!["unresolved_configured_only"]
+        );
+
+        let mut request = sample_request();
+        let result = evaluate_eligibility(&snapshot, &request, Some(&current)).unwrap();
+        assert!(
+            result.candidates[0]
+                .reasons
+                .contains(&"configuration_mismatch".into())
+        );
+        assert!(
+            result.candidates[0]
+                .reasons
+                .contains(&"workspace_dirty".into())
+        );
+        request.candidate_profile_ids.reverse();
+        assert_eq!(
+            result,
+            evaluate_eligibility(&snapshot, &request, Some(&current)).unwrap()
+        );
+        let mut path_mismatch = sample_current();
+        path_mismatch.execution_path = "different".into();
+        let result =
+            evaluate_eligibility(&snapshot, &sample_request(), Some(&path_mismatch)).unwrap();
+        assert!(
+            result.candidates[0]
+                .reasons
+                .contains(&"execution_path_mismatch".into())
+        );
+        path_mismatch.now = "2026-10-25T09:00:00Z".into();
+        let result =
+            evaluate_eligibility(&snapshot, &sample_request(), Some(&path_mismatch)).unwrap();
+        assert!(
+            result.candidates[0]
+                .reasons
+                .contains(&"snapshot_from_future".into())
+        );
+    }
 
     #[test]
     fn unknown_fields_and_schema_versions_are_rejected() {

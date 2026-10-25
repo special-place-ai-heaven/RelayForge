@@ -1,0 +1,61 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M005-S01",
+  "round": 2,
+  "title": "Persist immutable inventory and enforce capability eligibility",
+  "objective": "Deliver the bounded inventory and eligibility library/CLI path in inventory-plan.md without inventing live runtime evidence.",
+  "acceptance": [
+    "Implement the exact identity, immutable snapshot, privacy, freshness and current-state contracts in 02_analysis/inventory-plan.md using existing dependencies.",
+    "Persist transactional idempotent snapshots and reject same-ID conflicts without writes; preserve existing databases and event behavior.",
+    "Only exact fresh runtime-confirmed capabilities qualify against independent current state; missing or stale state and dirty-workspace mismatches remain unresolved.",
+    "Honor explicit selection without substitution and return deterministic per-candidate reasons; never dispatch or allow a request to assert trusted state.",
+    "Exercise fresh-process CLI import/show/eligibility diagnostics, including unavailable standalone runtime binding, with discovered positive and negative library tests.",
+    "Preserve existing recovery/privacy/ownership tests, extend verifier discovery gates, pass focused and full checks, and document observed limits without claiming G3/G4 completion."
+  ],
+  "non_goals": [
+    "Statistics/ranking, provider calls, native harness hooks, dispatch, tool bundles, new dependencies or packaging."
+  ],
+  "read_first": [
+    "08_pkg/CONTEXT.md",
+    "07_app/CONTEXT.md",
+    "02_analysis/CONTEXT.md",
+    "02_analysis/inventory-plan.md",
+    "02_analysis/foundation-contract.md",
+    "02_analysis/native-core-plan.md"
+  ],
+  "allowed_prefixes": [
+    "08_pkg/relayforge-core/",
+    "07_app/relayforge-cli/",
+    "scripts/product_verify.py",
+    "02_analysis/inventory-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/product_verify.py",
+      "--focused"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Source review: `05_governance/reviews/m005/M005-S01_r1_review.md` (sha256 `b7f845fb87bd51c9050dadc38eaab223761ac885dae68c17fa6b3535a73cc63a`)\n| M005-S01-001 | P2 | open | evaluate_eligibility classifies Configured and Unsupported facts before checking whether their profile revision, harness/configuration, and runtime scope match current state. A fact from another scope can therefore report unresolved_configured_only or excluded_unsupported for the current scope. Check applicability first and cover both cases in tests. |",
+  "memory": ""
+}

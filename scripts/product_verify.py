@@ -16,6 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "Cargo.toml"
 STAGES = ("fmt", "clippy", "unit", "integration", "doc")
 REQUIRED = {
+    "tests::inventory_schema_size_privacy_and_duplicate_keys_are_rejected",
+    "tests::inventory_import_replay_conflict_and_reopen_are_immutable",
+    "tests::eligibility_requires_separate_current_state_and_exact_confirmed_scope",
+    "tests::capability_statuses_and_evidence_freshness_have_explicit_reasons",
+    "tests::capability_statuses_require_applicability_before_classification",
+    "tests::eligibility_rejects_stale_state_dirty_workspace_and_never_substitutes_selection",
     "tests::unknown_fields_and_schema_versions_are_rejected",
     "tests::event_size_and_depth_are_bounded",
     "tests::session_open_is_a_durable_owner_claim",
@@ -27,6 +33,7 @@ REQUIRED = {
     "explicit_recovery_protects_active_owner_and_reconcile_is_repeatable",
     "identical_replay_is_noop_and_conflicting_duplicate_writes_nothing",
     "immutable_rows_reject_mutation_and_sources_can_reuse_event_ids",
+    "actual_cli_fresh_processes_inventory_import_show_and_binding_diagnostics",
     "parent_scope_mismatch_and_failed_append_are_atomic",
     "synthetic_sensitive_input_is_rejected_without_echo_or_storage",
     "two_process_claim_race_has_exactly_one_owner",

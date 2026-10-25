@@ -1,6 +1,8 @@
 use relayforge_core::{
-    AppendOutcome, AttemptOutcome, ComponentValue, Event, EventKind, EventRef, FailureCategory,
-    ObservedIdentity, SelectedIdentity, SpanRole, Store, ToolOutcome, open,
+    AppendOutcome, AttemptOutcome, CapabilityFact, CapabilityStatus, ComponentValue,
+    EligibilityRequest, Event, EventKind, EventRef, FailureCategory, InventoryProfile,
+    InventorySnapshot, ObservedIdentity, RequiredCapability, SelectedIdentity, SpanRole, Store,
+    ToolOutcome, WorkloadLabel, open,
 };
 use rusqlite::Connection;
 use std::io::Write;
@@ -1100,6 +1102,132 @@ fn actual_cli_fresh_processes_init_append_show_reconcile_accept() {
             None
         )
         .0
+    );
+}
+
+#[test]
+fn actual_cli_fresh_processes_inventory_import_show_and_binding_diagnostics() {
+    let (dir, path) = db();
+    let snapshot = InventorySnapshot {
+        schema_version: 1,
+        snapshot_id: "cli-snapshot".into(),
+        revision: "revision-1".into(),
+        policy_version: "policy-1".into(),
+        created_at: "2026-10-25T10:00:00Z".into(),
+        harness: "codex".into(),
+        harness_version: "1".into(),
+        adapter: "native".into(),
+        adapter_version: "1".into(),
+        runtime_scope: "runtime-1".into(),
+        session_scope: "session-1".into(),
+        configuration_fingerprint: "config-1".into(),
+        workspace_fingerprint: "workspace-1".into(),
+        profiles: vec![InventoryProfile {
+            profile_id: "profile-1".into(),
+            revision: "profile-rev-1".into(),
+            native_role: "worker".into(),
+            model_provider: "provider-1".into(),
+            configured_model_id: "alias-1".into(),
+            resolved_model_id: None,
+            resolved_model_version: None,
+            effort: "high".into(),
+            supported_efforts: vec!["high".into()],
+            capabilities: vec![CapabilityFact {
+                capability_id: "cap-1".into(),
+                value: "enabled".into(),
+                status: CapabilityStatus::Configured,
+                source_ref: "inventory/cap-1".into(),
+                observed_at: "2026-10-25T10:00:00Z".into(),
+                expires_at: "2026-10-26T10:00:00Z".into(),
+                profile_revision: "profile-rev-1".into(),
+                harness_version: "1".into(),
+                configuration_fingerprint: "config-1".into(),
+                runtime_scope: "runtime-1".into(),
+            }],
+        }],
+    };
+    let request = EligibilityRequest {
+        schema_version: 1,
+        request_id: "cli-request".into(),
+        task_id: "task-1".into(),
+        session_id: "session-1".into(),
+        snapshot_id: "cli-snapshot".into(),
+        policy_version: "policy-1".into(),
+        candidate_profile_ids: vec!["profile-1".into()],
+        execution_path: "native".into(),
+        selected_profile_id: None,
+        required_capabilities: vec![RequiredCapability {
+            capability_id: "cap-1".into(),
+            value: "enabled".into(),
+        }],
+        workload_labels: vec![WorkloadLabel {
+            name: "unknown".into(),
+            value: "preserved".into(),
+            provenance: "user".into(),
+        }],
+    };
+    let snapshot_path = dir.path().join("snapshot.json");
+    let request_path = dir.path().join("request.json");
+    std::fs::write(&snapshot_path, serde_json::to_vec(&snapshot).unwrap()).unwrap();
+    std::fs::write(&request_path, serde_json::to_vec(&request).unwrap()).unwrap();
+    let db_path = path.to_str().unwrap();
+    let snapshot_input = snapshot_path.to_str().unwrap();
+    let request_input = request_path.to_str().unwrap();
+    let (ok, imported) = cli(
+        &[
+            "inventory-import",
+            "--db",
+            db_path,
+            "--input",
+            snapshot_input,
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(imported["status"], "imported");
+    let (ok, replayed) = cli(
+        &[
+            "inventory-import",
+            "--db",
+            db_path,
+            "--input",
+            snapshot_input,
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(replayed["status"], "replayed");
+    let (ok, shown) = cli(
+        &[
+            "inventory-show",
+            "--db",
+            db_path,
+            "--snapshot",
+            "cli-snapshot",
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(shown["snapshot"]["snapshot_id"], "cli-snapshot");
+    let (ok, diagnostic) = cli(
+        &[
+            "eligibility",
+            "--db",
+            db_path,
+            "--snapshot",
+            "cli-snapshot",
+            "--input",
+            request_input,
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(diagnostic["binding"], "binding_unavailable");
+    assert_eq!(diagnostic["eligible_profile_ids"], serde_json::json!([]));
+    assert_eq!(diagnostic["outcome"], "no_eligible_candidate");
+    assert_eq!(
+        diagnostic["candidates"][0]["reasons"][0],
+        "missing_current_state"
     );
 }
 

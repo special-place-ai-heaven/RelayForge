@@ -1,4 +1,7 @@
-use relayforge_core::{Event, open, parse_event_bytes};
+use relayforge_core::{
+    Event, MAX_INVENTORY_BYTES, evaluate_eligibility, open, parse_eligibility_request_bytes,
+    parse_event_bytes, parse_inventory_bytes,
+};
 use rusqlite::Connection;
 use serde_json::json;
 use std::env;
@@ -54,6 +57,20 @@ fn read_event() -> Result<Event, String> {
     }
     parse_event_bytes(&input).map_err(|e| e.to_string())
 }
+fn read_json_file(path: &str) -> Result<Vec<u8>, String> {
+    let file = std::fs::File::open(path).map_err(|_| "input_read_failed")?;
+    let mut bytes = Vec::new();
+    file.take((MAX_INVENTORY_BYTES + 1) as u64)
+        .read_to_end(&mut bytes)
+        .map_err(|_| "input_read_failed")?;
+    if bytes.is_empty() || bytes.len() > MAX_INVENTORY_BYTES {
+        return Err("input_size_out_of_range".into());
+    }
+    Ok(bytes)
+}
+fn db_path(args: &[String]) -> Result<PathBuf, String> {
+    Ok(PathBuf::from(required(args, "--db")?))
+}
 fn run() -> Result<serde_json::Value, String> {
     let args: Vec<String> = env::args().skip(1).collect();
     let command = args.first().map(String::as_str).unwrap_or("");
@@ -104,6 +121,39 @@ fn run() -> Result<serde_json::Value, String> {
                 .map_err(|e| e.to_string())?;
             Ok(json!({"ok":true,"count":events.len(),"events":events}))
         }
+        "inventory-import" => {
+            check_options(&args[1..], &["--db", "--input"])?;
+            let path = db_path(&args[1..])?;
+            let input = required(&args[1..], "--input")?;
+            let snapshot = parse_inventory_bytes(&read_json_file(&input)?)
+                .map_err(|error| error.to_string())?;
+            let mut store = open(&path).map_err(|error| error.to_string())?;
+            let inserted = store
+                .import_inventory(snapshot.clone())
+                .map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"inventory-import","status":if inserted {"imported"} else {"replayed"},"snapshot_id":snapshot.snapshot_id}))
+        }
+        "inventory-show" => {
+            check_options(&args[1..], &["--db", "--snapshot"])?;
+            let path = db_path(&args[1..])?;
+            let snapshot_id = required(&args[1..], "--snapshot")?;
+            let store = open(&path).map_err(|error| error.to_string())?;
+            let snapshot = store.inventory(&snapshot_id).map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"inventory-show","snapshot":snapshot}))
+        }
+        "eligibility" => {
+            check_options(&args[1..], &["--db", "--snapshot", "--input"])?;
+            let path = db_path(&args[1..])?;
+            let snapshot_id = required(&args[1..], "--snapshot")?;
+            let input = required(&args[1..], "--input")?;
+            let request = parse_eligibility_request_bytes(&read_json_file(&input)?)
+                .map_err(|error| error.to_string())?;
+            let store = open(&path).map_err(|error| error.to_string())?;
+            let snapshot = store.inventory(&snapshot_id).map_err(|error| error.to_string())?;
+            let result = evaluate_eligibility(&snapshot, &request, None)
+                .map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"eligibility","binding":"binding_unavailable","eligible_profile_ids":[],"candidates":result.candidates,"outcome":"no_eligible_candidate"}))
+        }
         "reconcile" => {
             check_options(
                 &args[1..],
@@ -120,7 +170,7 @@ fn run() -> Result<serde_json::Value, String> {
             Ok(json!({"ok":true,"appended":appended,"session_id":session}))
         }
         _ => Err(
-            "usage: relayforge <init|append|show|reconcile|sqlite-version> --database PATH".into(),
+            "usage: relayforge <init|append|show|reconcile|inventory-import|inventory-show|eligibility|sqlite-version>".into(),
         ),
     }
 }
