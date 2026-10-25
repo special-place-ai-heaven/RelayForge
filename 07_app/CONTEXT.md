@@ -1,9 +1,9 @@
 # Workspace: application
 
-Status: inactive
+Status: native CLI admission
 
-Reserved for RelayForge CLI, native harness adapters, and application integration
-after an explicit roadmap admission. No runtime or hooks exist yet.
+M003 admits relayforge-cli under the bounded native-core plan and roadmap.
+Native harness adapters and hooks remain later work; no live dispatch is admitted.
 Read ../00_brief/decisions.md D003 before assuming a language.
 Use only the generated slice's named reads and write boundary; reusable core
 contracts belong in ../08_pkg/ once that workspace is admitted.

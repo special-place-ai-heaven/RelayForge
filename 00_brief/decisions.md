@@ -242,3 +242,28 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   work or alter a frozen envelope. G1-G6 and Q001 remain unchanged.
 - Supersedes: none; these are material refinements of later product acceptance,
   not a replacement workflow or a new execution queue.
+
+## D016 — Admit the native metadata core and CLI after canary qualification
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Use the separate root Cargo workspace and bounded contract in
+  ../02_analysis/native-core-plan.md for M003. Keep the accepted disposable
+  canary outside the product workspace. Reuse its exact Rust/SQLite versions
+  and candidate-verification machinery; do not reuse its synthetic event model
+  as the product. Persist closed typed metadata with transactional ownership,
+  explicit recovery, immutable attempt history and verification/acceptance gates.
+- Dependencies: serde =1.0.228 (derive) and serde_json =1.0.154 are admitted
+  for strict JSON serialization/validation: stdlib has no JSON implementation,
+  and hand-written JSON would add unnecessary correctness risk. Exact versions
+  were resolved with cargo info from the package registry. Preserve upstream
+  MIT/Apache-2.0 terms; third-party notice completeness remains a packaging gate.
+  rusqlite =0.40.0 and locked libsqlite3-sys 0.38.0 retain SQLite 3.53.1.
+- Bounds: no provider, harness hook, routing, network capture, service, package
+  or install behavior in M003. No new direct dependencies beyond those named.
+  Source, tests, locks and portable evidence are tracked; runtime stores and
+  build output remain in owned scratch. Full verification has a 900-second limit.
+- Reason: M002 qualification passed independent slice and holistic reviews.
+  The next unmet release dependency is usable G1/G2 code, with D015 accounting
+  observations preserved for later G3/G6 aggregation.
+- Supersedes: roadmap N1's pending canary admission only. G1-G6 and Q001 remain.

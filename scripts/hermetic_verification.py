@@ -12,13 +12,13 @@ import _workspace
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Keep scaffold gates and qualify the disposable native canary.
+# Keep scaffold gates; product verification owns the clean-candidate canary and product checks.
 COMMANDS: list[object] = [
     ["python", "-B", "scripts/roadmap.py", "check"],
     ["python", "-B", "scripts/ledger.py", "check"],
     ["git", "diff", "--check"],
     ["git", "diff", "--cached", "--check"],
-    ["python", "-B", "scripts/canary_verify.py"],
+    ["python", "-B", "scripts/product_verify.py"],
 ]
 
 

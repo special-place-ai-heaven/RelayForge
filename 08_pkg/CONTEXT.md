@@ -1,7 +1,7 @@
 # Workspace: package
 
-Status: canary active; reusable core not admitted
+Status: native core admission
 
-The admitted M002-S02 slice uses this workspace only for the disposable native
-canary. Rust 1.99.1 and SQLite are selected by D010; canary qualification remains
-pending. The reusable RelayForge core and public contracts are not admitted yet.
+M002's disposable canary is accepted qualification evidence. M003 admits the
+separate relayforge-core package under the bounded native-core plan and roadmap.
+Rust 1.99.1 and SQLite remain selected by D010. Packaging remains gated by Q001.
