@@ -1,6 +1,7 @@
 use relayforge_core::{
-    Event, MAX_INVENTORY_BYTES, evaluate_eligibility, open, parse_eligibility_request_bytes,
-    parse_event_bytes, parse_inventory_bytes,
+    AccountingRequest, Event, MAX_INVENTORY_BYTES, evaluate_eligibility, open,
+    parse_comparison_request_bytes, parse_eligibility_request_bytes, parse_event_bytes,
+    parse_inventory_bytes, parse_task_context_bytes,
 };
 use rusqlite::Connection;
 use serde_json::json;
@@ -133,6 +134,40 @@ fn run() -> Result<serde_json::Value, String> {
                 .map_err(|error| error.to_string())?;
             Ok(json!({"ok":true,"command":"inventory-import","status":if inserted {"imported"} else {"replayed"},"snapshot_id":snapshot.snapshot_id}))
         }
+        "context-import" => {
+            check_options(&args[1..], &["--db", "--input"])?;
+            let path = db_path(&args[1..])?;
+            let input = required(&args[1..], "--input")?;
+            let context = parse_task_context_bytes(&read_json_file(&input)?)
+                .map_err(|error| error.to_string())?;
+            let mut store = open(&path).map_err(|error| error.to_string())?;
+            let inserted = store
+                .import_task_context(context.clone())
+                .map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"context-import","status":if inserted {"imported"} else {"replayed"},"task_id":context.task_id}))
+        }
+        "accounting" => {
+            check_options(&args[1..], &["--db", "--task"])?;
+            let path = db_path(&args[1..])?;
+            let task = option(&args[1..], "--task")?;
+            let store = open(&path).map_err(|error| error.to_string())?;
+            let report = store
+                .accounting_report(&AccountingRequest { schema_version: 1, task_id: task })
+                .map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"accounting","report":report}))
+        }
+        "compare" => {
+            check_options(&args[1..], &["--db", "--input"])?;
+            let path = db_path(&args[1..])?;
+            let input = required(&args[1..], "--input")?;
+            let request = parse_comparison_request_bytes(&read_json_file(&input)?)
+                .map_err(|error| error.to_string())?;
+            let store = open(&path).map_err(|error| error.to_string())?;
+            let report = store
+                .compare_outcomes(&request, None)
+                .map_err(|error| error.to_string())?;
+            Ok(json!({"ok":true,"command":"compare","report":report}))
+        }
         "inventory-show" => {
             check_options(&args[1..], &["--db", "--snapshot"])?;
             let path = db_path(&args[1..])?;
@@ -170,7 +205,7 @@ fn run() -> Result<serde_json::Value, String> {
             Ok(json!({"ok":true,"appended":appended,"session_id":session}))
         }
         _ => Err(
-            "usage: relayforge <init|append|show|reconcile|inventory-import|inventory-show|eligibility|sqlite-version>".into(),
+            "usage: relayforge <init|append|show|reconcile|inventory-import|inventory-show|eligibility|context-import|accounting|compare|sqlite-version>".into(),
         ),
     }
 }

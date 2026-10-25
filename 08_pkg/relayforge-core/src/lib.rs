@@ -15,6 +15,14 @@ use rusqlite::{Connection, OptionalExtension, Transaction, TransactionBehavior, 
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
+mod accounting;
+pub use accounting::{
+    AccountingReport, AccountingRequest, AttemptAccounting, ComparisonReport, ComparisonRequest,
+    CompleteTotal, ContextLabel, CostPerAcceptedTask, DimensionAccounting, FailureOccurrence,
+    ProfileComparison, TaskAccounting, TaskContext, TaskLabels, UnitSubtotal, WilsonInterval,
+    parse_accounting_request_bytes, parse_comparison_request_bytes, parse_task_context_bytes,
+};
+
 pub const EVENT_SCHEMA_VERSION: u16 = 1;
 pub const DATABASE_SCHEMA_VERSION: i64 = 1;
 pub const MAX_EVENT_BYTES: usize = 65_536;
@@ -62,6 +70,13 @@ CREATE TABLE IF NOT EXISTS inventory_snapshots (
     snapshot_id TEXT PRIMARY KEY,
     snapshot_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS task_contexts (
+    context_id TEXT PRIMARY KEY,
+    task_id TEXT NOT NULL UNIQUE,
+    context_json TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS task_contexts_no_update BEFORE UPDATE ON task_contexts BEGIN SELECT RAISE(ABORT,'immutable task context'); END;
+CREATE TRIGGER IF NOT EXISTS task_contexts_no_delete BEFORE DELETE ON task_contexts BEGIN SELECT RAISE(ABORT,'immutable task context'); END;
 CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_update BEFORE UPDATE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
 CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_delete BEFORE DELETE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
 CREATE TRIGGER IF NOT EXISTS events_no_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT,'immutable event'); END;
@@ -78,6 +93,13 @@ CREATE TABLE IF NOT EXISTS inventory_snapshots (
     snapshot_id TEXT PRIMARY KEY,
     snapshot_json TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS task_contexts (
+    context_id TEXT PRIMARY KEY,
+    task_id TEXT NOT NULL UNIQUE,
+    context_json TEXT NOT NULL
+);
+CREATE TRIGGER IF NOT EXISTS task_contexts_no_update BEFORE UPDATE ON task_contexts BEGIN SELECT RAISE(ABORT,'immutable task context'); END;
+CREATE TRIGGER IF NOT EXISTS task_contexts_no_delete BEFORE DELETE ON task_contexts BEGIN SELECT RAISE(ABORT,'immutable task context'); END;
 CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_update BEFORE UPDATE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
 CREATE TRIGGER IF NOT EXISTS inventory_snapshots_no_delete BEFORE DELETE ON inventory_snapshots BEGIN SELECT RAISE(ABORT,'immutable inventory snapshot'); END;
 COMMIT;

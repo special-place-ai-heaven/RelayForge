@@ -1,8 +1,8 @@
 use relayforge_core::{
-    AppendOutcome, AttemptOutcome, CapabilityFact, CapabilityStatus, ComponentValue,
-    EligibilityRequest, Event, EventKind, EventRef, FailureCategory, InventoryProfile,
-    InventorySnapshot, ObservedIdentity, RequiredCapability, SelectedIdentity, SpanRole, Store,
-    ToolOutcome, WorkloadLabel, open,
+    AppendOutcome, AttemptOutcome, CapabilityFact, CapabilityStatus, ComparisonRequest,
+    ComponentValue, ContextLabel, EligibilityRequest, Event, EventKind, EventRef, FailureCategory,
+    InventoryProfile, InventorySnapshot, ObservedIdentity, RequiredCapability, SelectedIdentity,
+    SpanRole, Store, TaskContext, TaskLabels, ToolOutcome, WorkloadLabel, open,
 };
 use rusqlite::Connection;
 use std::io::Write;
@@ -1229,6 +1229,251 @@ fn actual_cli_fresh_processes_inventory_import_show_and_binding_diagnostics() {
         diagnostic["candidates"][0]["reasons"][0],
         "missing_current_state"
     );
+}
+
+#[test]
+fn actual_cli_fresh_processes_context_accounting_and_comparison() {
+    let (dir, path) = db();
+    let db_path = path.to_str().unwrap();
+    assert!(cli(&["init", "--database", db_path], None).0);
+    let session = Event::new(
+        "owner-a",
+        "session-open",
+        EventKind::SessionOpened {
+            session_id: "account-session".into(),
+            owner_id: "owner-a".into(),
+        },
+    );
+    assert!(cli(&["append", "--database", db_path], Some(&session)).0);
+    let profile = InventoryProfile {
+        profile_id: "account-profile".into(),
+        revision: "account-profile-revision".into(),
+        native_role: "worker".into(),
+        model_provider: "provider".into(),
+        configured_model_id: "account-model-alias".into(),
+        resolved_model_id: Some("account-model".into()),
+        resolved_model_version: Some("v1".into()),
+        effort: "high".into(),
+        supported_efforts: vec!["high".into()],
+        capabilities: Vec::new(),
+    };
+    let snapshot = InventorySnapshot {
+        schema_version: 1,
+        snapshot_id: "account-snapshot".into(),
+        revision: "revision-1".into(),
+        policy_version: "policy-1".into(),
+        created_at: "2026-10-25T09:00:00Z".into(),
+        harness: "codex".into(),
+        harness_version: "1".into(),
+        adapter: "native".into(),
+        adapter_version: "1".into(),
+        runtime_scope: "runtime-1".into(),
+        session_scope: "account-session".into(),
+        configuration_fingerprint: "config-1".into(),
+        workspace_fingerprint: "workspace-1".into(),
+        profiles: vec![profile],
+    };
+    let snapshot_path = dir.path().join("account-snapshot.json");
+    std::fs::write(&snapshot_path, serde_json::to_vec(&snapshot).unwrap()).unwrap();
+    let snapshot_input = snapshot_path.to_str().unwrap();
+    let (ok, imported) = cli(
+        &[
+            "inventory-import",
+            "--db",
+            db_path,
+            "--input",
+            snapshot_input,
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(imported["status"], "imported");
+    let task = Event {
+        schema_version: 1,
+        source_id: "owner-a".into(),
+        event_id: "account-task-create".into(),
+        parents: vec![EventRef {
+            source_id: "owner-a".into(),
+            event_id: "session-open".into(),
+        }],
+        kind: EventKind::TaskCreated {
+            session_id: "account-session".into(),
+            task_id: "account-task".into(),
+            required_check_ids: Vec::new(),
+        },
+    };
+    assert!(cli(&["append", "--database", db_path], Some(&task)).0);
+    let context = TaskContext {
+        schema_version: 1,
+        context_id: "account-context".into(),
+        task_id: "account-task".into(),
+        session_id: "account-session".into(),
+        inventory_snapshot_id: "account-snapshot".into(),
+        initial_profile_id: "account-profile".into(),
+        initial_profile_revision: "account-profile-revision".into(),
+        policy_version: "policy-1".into(),
+        observed_at: "2026-10-25T10:00:00Z".into(),
+        labels: TaskLabels {
+            task_type: ContextLabel::Known {
+                value: "coding".into(),
+                provenance: "test".into(),
+            },
+            difficulty: ContextLabel::Known {
+                value: "medium".into(),
+                provenance: "test".into(),
+            },
+            readiness: ContextLabel::Known {
+                value: "ready".into(),
+                provenance: "test".into(),
+            },
+        },
+    };
+    let context_path = dir.path().join("account-context.json");
+    std::fs::write(&context_path, serde_json::to_vec(&context).unwrap()).unwrap();
+    let context_input = context_path.to_str().unwrap();
+    let (ok, context_result) = cli(
+        &["context-import", "--db", db_path, "--input", context_input],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(context_result["status"], "imported");
+    let intent = Event {
+        schema_version: 1,
+        source_id: "owner-a".into(),
+        event_id: "account-intent".into(),
+        parents: vec![EventRef {
+            source_id: "owner-a".into(),
+            event_id: "account-task-create".into(),
+        }],
+        kind: EventKind::AttemptIntent {
+            session_id: "account-session".into(),
+            task_id: "account-task".into(),
+            attempt_id: "account-attempt".into(),
+            predecessor_attempt_id: None,
+            span_id: "account-span".into(),
+            span_role: SpanRole::Worker,
+            selected: SelectedIdentity {
+                profile: "account-profile".into(),
+                model: "account-model-alias".into(),
+                model_version: "v1".into(),
+                effort: "high".into(),
+            },
+        },
+    };
+    assert!(cli(&["append", "--database", db_path], Some(&intent)).0);
+    let result = Event {
+        schema_version: 1,
+        source_id: "owner-a".into(),
+        event_id: "account-result".into(),
+        parents: vec![EventRef {
+            source_id: "owner-a".into(),
+            event_id: "account-intent".into(),
+        }],
+        kind: EventKind::AttemptResult {
+            session_id: "account-session".into(),
+            task_id: "account-task".into(),
+            attempt_id: "account-attempt".into(),
+            outcome: AttemptOutcome::Success,
+            observed: ObservedIdentity::Known {
+                profile: "account-profile".into(),
+                model: "account-model".into(),
+                model_version: "v1".into(),
+                effort: "high".into(),
+            },
+            evidence_ref: Some("receipts/account".into()),
+        },
+    };
+    assert!(cli(&["append", "--database", db_path], Some(&result)).0);
+    let cost = Event {
+        schema_version: 1,
+        source_id: "owner-a".into(),
+        event_id: "account-cost".into(),
+        parents: vec![EventRef {
+            source_id: "owner-a".into(),
+            event_id: "account-result".into(),
+        }],
+        kind: EventKind::UsageCost {
+            session_id: "account-session".into(),
+            task_id: "account-task".into(),
+            attempt_id: "account-attempt".into(),
+            usage: ComponentValue::Known {
+                value: 100,
+                unit: "tokens".into(),
+            },
+            cost: ComponentValue::Known {
+                value: 10,
+                unit: "micro".into(),
+            },
+            elapsed_ms: ComponentValue::Known {
+                value: 25,
+                unit: "ms".into(),
+            },
+        },
+    };
+    assert!(cli(&["append", "--database", db_path], Some(&cost)).0);
+    let accepted = Event {
+        schema_version: 1,
+        source_id: "owner-a".into(),
+        event_id: "account-accepted".into(),
+        parents: vec![EventRef {
+            source_id: "owner-a".into(),
+            event_id: "account-result".into(),
+        }],
+        kind: EventKind::TaskAccepted {
+            session_id: "account-session".into(),
+            task_id: "account-task".into(),
+            attempt_id: "account-attempt".into(),
+            actor_id: "reviewer".into(),
+            evidence_ref: "reviews/account".into(),
+        },
+    };
+    assert!(cli(&["append", "--database", db_path], Some(&accepted)).0);
+    let (ok, accounting) = cli(
+        &["accounting", "--db", db_path, "--task", "account-task"],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(accounting["report"]["tasks"][0]["accepted"], true);
+    assert_eq!(
+        accounting["report"]["tasks"][0]["cost"]["full_chain_total"]["value"],
+        10
+    );
+
+    let comparison = ComparisonRequest {
+        schema_version: 1,
+        baseline_profile_id: "account-profile".into(),
+        evidence_window_start: "2026-10-24T00:00:00Z".into(),
+        evidence_window_end: "2026-10-26T00:00:00Z".into(),
+        eligibility: EligibilityRequest {
+            schema_version: 1,
+            request_id: "account-compare".into(),
+            task_id: "account-task".into(),
+            session_id: "account-session".into(),
+            snapshot_id: "account-snapshot".into(),
+            policy_version: "policy-1".into(),
+            candidate_profile_ids: vec!["account-profile".into()],
+            execution_path: "native".into(),
+            selected_profile_id: None,
+            required_capabilities: Vec::new(),
+            workload_labels: Vec::new(),
+        },
+    };
+    let comparison_path = dir.path().join("account-comparison.json");
+    std::fs::write(&comparison_path, serde_json::to_vec(&comparison).unwrap()).unwrap();
+    let (ok, compared) = cli(
+        &[
+            "compare",
+            "--db",
+            db_path,
+            "--input",
+            comparison_path.to_str().unwrap(),
+        ],
+        None,
+    );
+    assert!(ok);
+    assert_eq!(compared["report"]["method"], "descriptive-v1");
+    assert_eq!(compared["report"]["binding"], "binding_unavailable");
+    assert_eq!(compared["report"]["outcome"], "no_eligible_candidate");
 }
 
 #[test]

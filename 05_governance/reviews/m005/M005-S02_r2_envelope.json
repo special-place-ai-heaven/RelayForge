@@ -1,0 +1,61 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M005-S02",
+  "round": 2,
+  "title": "Report complete attempt accounting and conservative baseline comparisons",
+  "objective": "Implement useful local outcome statistics and honest advisory comparisons without hiding failures or missing evidence.",
+  "acceptance": [
+    "Implement 02_analysis/accounting-plan.md using existing dependencies, preserving accepted storage and inventory behavior.",
+    "Persist immutable pre-attempt task context; reject retroactive labels and preserve unclassified legacy observations with unknown age.",
+    "Account for every physical attempt and parent repair; distinguish explicit acceptance from worker success and expose unresolved and operational failures.",
+    "Report per-unit known subtotals and unknown complete totals for missing, ambiguous, mixed-unit or overflowing components without silent truncation.",
+    "Apply exact cohort matching and S01 eligibility before fixed-baseline descriptive-v1 comparisons; report uncertainty and insufficient evidence honestly, with no dispatch or automatic promotion.",
+    "Exercise documented fresh-process CLI context, accounting and comparison paths, required discovery tests and the authoritative full check; disclose synthetic and unavailable native-binding limits."
+  ],
+  "non_goals": [
+    "Native adapters, provider calls, calibrated dispatch thresholds, dependency additions, tool bundles or packaging."
+  ],
+  "read_first": [
+    "08_pkg/CONTEXT.md",
+    "07_app/CONTEXT.md",
+    "02_analysis/CONTEXT.md",
+    "02_analysis/accounting-plan.md",
+    "02_analysis/inventory-plan.md",
+    "02_analysis/foundation-contract.md"
+  ],
+  "allowed_prefixes": [
+    "08_pkg/relayforge-core/",
+    "07_app/relayforge-cli/",
+    "scripts/product_verify.py",
+    "02_analysis/accounting-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/product_verify.py",
+      "--focused"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "Source review: `05_governance/reviews/m005/M005-S02_r1_review.md` (sha256 `a47c4d8821fec6255c3d3ce0ba69d34fe2d577d520a719cd6a92df9e2a25b83e`)\n| M005-S02-001 | P2 | open | The comparison test covers one shared cohort and a clearly separated result, but not the required mismatched cohort/profile identity or overlapping Wilson interval cases. Add coverage for these conservative comparison boundaries before pass. |",
+  "memory": ""
+}

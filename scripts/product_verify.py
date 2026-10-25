@@ -21,6 +21,12 @@ REQUIRED = {
     "tests::eligibility_requires_separate_current_state_and_exact_confirmed_scope",
     "tests::capability_statuses_and_evidence_freshness_have_explicit_reasons",
     "tests::capability_statuses_require_applicability_before_classification",
+    "accounting::tests::context_replay_conflict_late_rejection_and_legacy_age_are_explicit",
+    "accounting::tests::accounting_counts_repair_cost_and_preserves_ambiguous_mixed_and_overflow_values",
+    "accounting::tests::comparison_uses_eligible_exact_cohorts_wilson_baseline_and_honest_limits",
+    "accounting::tests::comparison_excludes_mismatched_cohort_dimensions",
+    "accounting::tests::comparison_excludes_profile_identity_mismatch",
+    "accounting::tests::comparison_does_not_prefer_overlapping_wilson_intervals",
     "tests::eligibility_rejects_stale_state_dirty_workspace_and_never_substitutes_selection",
     "tests::unknown_fields_and_schema_versions_are_rejected",
     "tests::event_size_and_depth_are_bounded",
@@ -34,6 +40,7 @@ REQUIRED = {
     "identical_replay_is_noop_and_conflicting_duplicate_writes_nothing",
     "immutable_rows_reject_mutation_and_sources_can_reuse_event_ids",
     "actual_cli_fresh_processes_inventory_import_show_and_binding_diagnostics",
+    "actual_cli_fresh_processes_context_accounting_and_comparison",
     "parent_scope_mismatch_and_failed_append_are_atomic",
     "synthetic_sensitive_input_is_rejected_without_echo_or_storage",
     "two_process_claim_race_has_exactly_one_owner",
@@ -82,8 +89,8 @@ def run_product(root: Path, scratch: Path, stages: tuple[str, ...] = STAGES) -> 
     if "clippy" in stages:
         canary._run(cargo("clippy", "--manifest-path", str(MANIFEST), "--workspace", "--all-targets", "--target", target, "--locked", "--offline", "--", "-D", "warnings"), cwd=root, env=env, deadline=deadline, scratch=scratch)
     for stage, selector, required in (
-        ("unit", ["--workspace", "--lib"], {name for name in REQUIRED if name.startswith("tests::")}),
-        ("integration", ["--manifest-path", str(root / "08_pkg/relayforge-core/Cargo.toml"), "--test", "storage_contract"], {name for name in REQUIRED if not name.startswith("tests::")}),
+        ("unit", ["--workspace", "--lib"], {name for name in REQUIRED if name.startswith(("tests::", "accounting::tests::"))}),
+        ("integration", ["--manifest-path", str(root / "08_pkg/relayforge-core/Cargo.toml"), "--test", "storage_contract"], {name for name in REQUIRED if not name.startswith(("tests::", "accounting::tests::"))}),
         ("doc", ["--workspace", "--doc"], set()),
     ):
         if stage not in stages:
