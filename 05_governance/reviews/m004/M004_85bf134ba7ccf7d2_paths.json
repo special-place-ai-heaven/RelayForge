@@ -1,0 +1,121 @@
+[
+  {
+    "slice": "M004-S01",
+    "path": "08_pkg/canary/rust-toolchain.toml",
+    "sha": "d13306be0ecda81ce779baa290ffb417380d525928477f16200884b5169cca33",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "rust-toolchain.toml",
+    "sha": "b9c8d2d59f6f46474c0cfa0b8b77bea21d94fc73a30ad93d5bf6385c422197d2",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "scripts/canary_verify.py",
+    "sha": "73897dae7da08b1477be031181389f7b114f1c61f2918ed037b062677480b7dd",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "scripts/product_verify.py",
+    "sha": "f458f9557b76443c407168a870c9cb8e97cfb75ab38f63716bf55fead88a35a9",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": ".github/workflows/ci.yml",
+    "sha": "f8618a4e46501b1a179fd5bc53e6408800c9171666c8d6eab9231ce45f77d8e8",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "02_analysis/ci-results.md",
+    "sha": "ff59179fed07acfe00d6dbdcb2a1cfc7988adbe2c4790ec3a39071c9977f0692",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "docs/ci.md",
+    "sha": "a793593abd9cf74bdc67ffbe3064dd8e89b08f9c43c2e267af2500cb272d4c49",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M004-S01",
+    "path": "scripts/ci_contract_check.py",
+    "sha": "c9905896f278fd47d3e13a859d4b3688754eb225ff79a5c2a98036aa11e5fee9",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M004-S03",
+    "path": ".github/workflows/ci.yml",
+    "sha": "ef33b93bd44a00b7dc7a305604b09df2c2667d16a3dd9edbc729541856ec4a6d",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S03",
+    "path": "02_analysis/ci-results.md",
+    "sha": "575fa69af602167198d8b383e1ee61b74ed8cb3504da019f4a982d7ec791a8cc",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S03",
+    "path": "docs/ci.md",
+    "sha": "9dc3805ebfe7f69a9e1861631138006329887151c0cb1f1448a2a37dacfc81ea",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S03",
+    "path": "scripts/ci_contract_check.py",
+    "sha": "322bd648c1e27fd35d97e846e95a1f5864f7a737dbe50b25e3cdcbd022588a44",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M004-S04",
+    "path": ".github/workflows/ci.yml",
+    "sha": "7811657e537bce4e55432ebb6cad7e1e1065445ad95e5db6235ae20ce515b3cf",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S04",
+    "path": "02_analysis/ci-results.md",
+    "sha": "43bb38de47e89edd72b55a178a5d925757726f047f1915c563e1d04c1f60817d",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M004-S04",
+    "path": "docs/ci.md",
+    "sha": "e0a9df0c40c44a031dbf96072bffe23ea5faf68cbc376f63f8dc3b7a9ff4d968",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M004-S04",
+    "path": "scripts/ci_contract_check.py",
+    "sha": "fbb3ae57685e590b27e3430a14631a83ed43fccf9499cfa90016465fca6ffb27",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M004-S02",
+    "path": "02_analysis/ci-qualification.md",
+    "sha": "9e8cab495819a8f4a3142b477e6b9978e5ff049f81ab1e91e2a59c366f79407a",
+    "kind": "added",
+    "round": 1
+  }
+]
