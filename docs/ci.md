@@ -52,8 +52,11 @@ slice is coded. It retains the clean-candidate Git ancestry, ledger check,
 canary checks, product checks, source/index/HEAD stability and 900-second
 verifier budget. The first actual run passed hosted Windows and proved five
 distinct fresh Linux runners accepted jobs; it did not qualify Linux product
-checks. S02 must record a new real run after the correction, with revision,
-native targets/tool versions and per-job conclusions. The `fresh` label does
+checks. The corrected source revision `e3e30a1` subsequently passed Windows
+and all five Linux stages in [run 40213004003](https://github.com/special-place-ai-heaven/RelayForge/actions/runs/40213004003).
+Exact native targets, tool versions and per-job conclusions are retained in
+[the accepted S02 qualification evidence](../05_governance/reviews/m004/M004-S02_r2_coder_notes.md).
+The `fresh` label does
 not prove host isolation or future availability.
 
 Both jobs set empty `RUSTC_WRAPPER` and `RUSTC_WORKSPACE_WRAPPER` values at
@@ -62,5 +65,6 @@ Cargo's compiler invocation while leaving host configuration untouched. Run
 40211448552 passed Windows; Linux installed Rust 1.99.1, then Cargo failed when
 the inherited `sccache` wrapper was unavailable. That run did not execute Linux
 product stages. The S04 worker probe and configuration evidence are recorded in
-`02_analysis/ci-results.md`; remote Linux qualification remains pending a new
-observed CI run.
+`02_analysis/ci-results.md`; the successful run above qualifies the corrected
+revision on Linux as well as Windows. Earlier failed-run evidence is historical.
+Q001 remains open and blocks packaging/distribution; CI success does not close it.
