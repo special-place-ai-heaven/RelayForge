@@ -16,6 +16,9 @@ includes a fresh request to build or continue RelayForge. Read in this order:
    files for the intent, constraints, accepted decisions, and current run boundary.
 2. `roadmap.yaml` and `docs/operating.md` for admitted slices and the manual `/2`
    loop, including recovery and the architect/coder/reviewer handoffs.
+   Read `docs/workflow-graph.md` for transition guards and active versus optional
+   controls. When bootstrapping via a goal, use
+   `prompts/GOAL_RELAYFORGE_BOOTSTRAP.md`; its procedure never replaces the ledger.
 3. `02_analysis/CONTEXT.md`, `02_analysis/foundation-brief.md`, and
    `02_analysis/actionable-findings.md` for the bounded planning input.
 

@@ -18,6 +18,7 @@ lookups; do not load them all or treat their contents as admitted features.
 
 | Need | Read |
 |---|---|
+| Existing v4 workflow states, transition guards, recovery and adaptation boundaries | [Workflow graph](../docs/workflow-graph.md) |
 | Bounded input for the initial foundation contract | [foundation-brief.md](foundation-brief.md) |
 | Detailed registry, routing, observation, recovery, and evaluation contracts | Relevant sections of [phase1-spec.md](phase1-spec.md) |
 | Historical configuration findings, research claims, sources, and their limits | Relevant sections of [evidence-brief.md](evidence-brief.md) |

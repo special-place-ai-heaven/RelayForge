@@ -82,6 +82,13 @@ gates in the [upgrade guide](docs/upgrading.md).
 
 ## Project references
 
+For a fresh session, ask: "Read AGENTS.md and
+prompts/GOAL_RELAYFORGE_BOOTSTRAP.md, then pursue that bounded goal using the
+existing manual loop. Resume from the actual ledger state."
+Use the harness's native goal mechanism if available; mentioning a file alone
+does not activate it. The [workflow graph](docs/workflow-graph.md) maps the
+existing transitions and identifies which optional controls are inactive.
+
 | Question | Read |
 |---|---|
 | What are we building and why? | [Project intake](00_brief/intake.md) |
