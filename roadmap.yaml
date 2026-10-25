@@ -7,7 +7,7 @@ verification:
     - [python, -B, scripts/roadmap.py, check]
   observation: process
   timeout_seconds: 900
-allowed_prefixes: [02_analysis/, 07_app/, 08_pkg/, Cargo.toml, Cargo.lock, rust-toolchain.toml, scripts/canary_verify.py, scripts/product_verify.py]
+allowed_prefixes: [02_analysis/, 07_app/, 08_pkg/, Cargo.toml, Cargo.lock, rust-toolchain.toml, scripts/canary_verify.py, scripts/product_verify.py, scripts/ci_contract_check.py, .github/workflows/, docs/ci.md]
 forbidden:
   - 00_brief/
   - 05_governance/
@@ -158,6 +158,62 @@ milestones:
         focused:
           - [python, -B, scripts/product_verify.py, --focused]
         kind: code
+  - id: M004
+    title: CI configuration and observed platform qualification
+    status: active
+    risk: ordinary
+    holistic_review: true
+    slices:
+      - id: M004-S01
+        title: Add portable checks and the requested runner workflow
+        objective: Implement the bounded CI mechanisms and trust gates in ci-plan.md, preserving accepted core behavior.
+        acceptance:
+          - Implement the workflow and verifier contracts in 02_analysis/ci-plan.md with no product schema or domain-logic change.
+          - Windows full checks use windows-latest; five useful Linux stages use self-hosted linux/fresh with max-parallel 5 and native target evidence.
+          - Reject public fork execution on custom runners; preserve read-only permissions, immutable action pins, full Git ancestry and job timeouts.
+          - Maintain explicit fmt, Clippy, unit, integration/CLI and doc stages with actual CLI builds and nonempty discovered/executed required tests; retain all Windows assertions.
+          - Deterministic workflow-contract checks and negative fixtures reject unsafe runner, permission, action-pin, ancestry and trust-gate changes; include them in full verification.
+          - Local Windows full verification remains clean-candidate, pinned, offline and source/index/HEAD-stable; record portable evidence and documented CI commands/limits.
+          - Do not claim Linux or GitHub-hosted qualification before actual CI runs; preserve missing runner/access evidence for S02.
+        non_goals:
+          - Product domain changes, new product dependencies, packaging, provider calls or host/service reconfiguration.
+        read_first:
+          - 02_analysis/CONTEXT.md
+          - 00_brief/decisions.md
+          - 00_brief/release-contract.md
+          - 02_analysis/ci-plan.md
+          - scripts/product_verify.py
+          - scripts/canary_verify.py
+          - scripts/hermetic_verification.py
+          - 08_pkg/relayforge-core/tests/storage_contract.rs
+          - rust-toolchain.toml
+          - 08_pkg/canary/rust-toolchain.toml
+          - pyproject.toml
+        allowed_prefixes: [.github/workflows/, scripts/product_verify.py, scripts/canary_verify.py, scripts/ci_contract_check.py, 08_pkg/relayforge-core/tests/storage_contract.rs, rust-toolchain.toml, 08_pkg/canary/rust-toolchain.toml, docs/ci.md, 02_analysis/ci-results.md]
+        focused:
+          - [python, -B, scripts/ci_contract_check.py]
+          - [python, -B, scripts/product_verify.py, --focused]
+        kind: code
+      - id: M004-S02
+        title: Record actual hosted Windows and fresh Linux qualification
+        objective: Qualify the reviewed CI configuration using real runs of the committed source revision.
+        acceptance:
+          - Record run URLs, exact source revision, host/target/tool versions and per-job conclusions for Windows full and all five Linux stages.
+          - Verify public fork versus trusted-source runner gating from actual workflow configuration and executed event context.
+          - Report unavailable runners, authentication, divergence or failures honestly with actor/action evidence; never infer Linux success from configuration.
+          - Use only sanitized results; keep raw logs, stores, caches and build output untracked and retain Q001 packaging gate.
+        non_goals:
+          - Modifying workflows or product code in this evidence-only slice; hiding failed jobs or changing runner policy.
+        read_first:
+          - 02_analysis/CONTEXT.md
+          - 00_brief/decisions.md
+          - 02_analysis/ci-plan.md
+          - docs/ci.md
+          - .github/workflows/ci.yml
+        allowed_prefixes: [02_analysis/ci-qualification.md]
+        focused:
+          - [python, -B, scripts/ci_contract_check.py]
+        kind: docs
 ruled_out:
   - id: R1
     text: Python product runtime; Python remains template workflow tooling only.

@@ -299,3 +299,25 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   concrete complexity or failed evidence; do not add speculative research lanes.
 - Supersedes: the requirement to duplicate the full command in every coder turn
   before the architect's mandatory authoritative run. No other authority changes.
+
+## D018 — Qualify CI after reviewed configuration, without inferred runner capacity
+
+- Status: accepted
+- Date: 2026-10-25
+- Decision: Admit the bounded CI plan in ../02_analysis/ci-plan.md. Windows uses
+  windows-latest for the full maintained verifier. Five independent Linux product
+  stages use self-hosted linux/fresh capacity, up to five in parallel, with public
+  fork code excluded from custom runners and read-only workflow permissions.
+  Preserve full Git ancestry, pinned actions/toolchain, explicit dependency
+  provisioning, offline checks and temporary runtime data.
+- Evidence order: S01 local validation and independent review precede its commit
+  and authorized non-force push. S02 qualifies actual CI executions; a queued or
+  blocked Linux job is not a Linux pass. Missing access/runner evidence is an
+  explicit blocker while independent product work continues.
+- Reason: Owner explicitly requested these runners and continuing CI delivery;
+  M003 core/CLI now passed full verification and independent review. D017 removes
+  duplicate execution/review work, not qualification requirements.
+- Bounds: no new product dependency, global default change, service installation,
+  credential access or privileged fork execution. Source/tests/locks/evidence stay
+  tracked; artifacts are limited to privacy-safe summaries. Q001 remains open.
+- Supersedes: none; implements D014's selected CI policy.
