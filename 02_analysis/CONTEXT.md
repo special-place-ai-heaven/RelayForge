@@ -18,6 +18,7 @@ lookups; do not load them all or treat their contents as admitted features.
 
 | Need | Read |
 |---|---|
+| Admitted narrow repair for append-only decision authority, preserving old grants and strict artifact checks | [authority-history-plan.md](authority-history-plan.md) |
 | Pre-packaging license/provenance observations and proposed Q001 exclusion route (not approval) | [distribution-input-observations.md](distribution-input-observations.md) |
 | Admitted attempt accounting, immutable task context and conservative fixed-baseline comparisons | [accounting-plan.md](accounting-plan.md) |
 | Admitted immutable inventory and eligibility contract, including trusted-state boundary and interim CLI limits | [inventory-plan.md](inventory-plan.md) |
