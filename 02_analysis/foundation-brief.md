@@ -98,6 +98,11 @@ measurement boundary: compact continuation views must preserve references while
 leaving failure/cost accounting intact. Record handoff policy and adapter evidence
 coverage so continuation changes are not misattributed to model/effort capability.
 
+The [issue triage review](issue-triage-source-review-2026-10-25.md) separates task
+category, readiness, difficulty and worker suitability. Good category prediction
+does not validate readiness or model/effort success. Retain input coverage and
+rubric provenance; evaluate each signal against independent outcomes and baselines.
+
 ## Foundation slice output
 
 Specify the minimum contracts and compare at most two non-Python toolchain
