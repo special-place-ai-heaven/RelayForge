@@ -1,0 +1,79 @@
+[
+  {
+    "slice": "M005-S01",
+    "path": "07_app/relayforge-cli/src/main.rs",
+    "sha": "070d8767d8552568b94e4f252ebf32f37c679723619fde8ddf13c1a07ad0a9b9",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M005-S01",
+    "path": "08_pkg/relayforge-core/src/lib.rs",
+    "sha": "5c3d6af81514102bc2723e4c83b54bde77dcd126fb305f2b92c23ceac51baa0d",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M005-S01",
+    "path": "08_pkg/relayforge-core/tests/storage_contract.rs",
+    "sha": "71421da3b35e7060b44b49c59a9c2f3574b279d04e3cfeb6a9d2f30a96c89e1a",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M005-S01",
+    "path": "scripts/product_verify.py",
+    "sha": "673c3d7a4dbdb8f697434535d377bd9836fa867616f3ad024114654f418ce9c9",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M005-S01",
+    "path": "02_analysis/inventory-results.md",
+    "sha": "83f3d8f57207c719c320d407464922cf64d4cb37ff14a4f213844f1d7ec2e3be",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M005-S02",
+    "path": "07_app/relayforge-cli/src/main.rs",
+    "sha": "d60c1a2117fad4d1a6e1ec2f5c46c899dd95b5887a709ca5b931fe274fe7037f",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M005-S02",
+    "path": "08_pkg/relayforge-core/src/lib.rs",
+    "sha": "a5817c31f2ae24a504691ad8678370bf4c0afc992aab21d78cb9c7ea7427e043",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M005-S02",
+    "path": "08_pkg/relayforge-core/tests/storage_contract.rs",
+    "sha": "2a99736ec9ff81da72d7d82b954194080a6e231fc8d6a59a244affd6b0398c9a",
+    "kind": "modified",
+    "round": 1
+  },
+  {
+    "slice": "M005-S02",
+    "path": "scripts/product_verify.py",
+    "sha": "c70db5e9a0db7a01d277ea8e618835f2109a71bc32cd1a8ae00abebb839f2ada",
+    "kind": "modified",
+    "round": 2
+  },
+  {
+    "slice": "M005-S02",
+    "path": "02_analysis/accounting-results.md",
+    "sha": "718236a5507cdd61e7108feb89b5fe49bac8063f9210c9ff7d1058299158b839",
+    "kind": "added",
+    "round": 1
+  },
+  {
+    "slice": "M005-S02",
+    "path": "08_pkg/relayforge-core/src/accounting.rs",
+    "sha": "42a39e082b0b3de6560e767ca4cb84fdfb9037a7e1caf6c4bfbb3c15a65c1ef0",
+    "kind": "added",
+    "round": 2
+  }
+]
