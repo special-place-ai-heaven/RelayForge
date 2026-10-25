@@ -1,0 +1,54 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M004-S02",
+  "round": 1,
+  "title": "Record actual hosted Windows and fresh Linux qualification",
+  "objective": "Qualify the reviewed CI configuration using real runs of the committed source revision.",
+  "acceptance": [
+    "Record run URLs, exact source revision, host/target/tool versions and per-job conclusions for Windows full and all five Linux stages.",
+    "Verify public fork versus trusted-source runner gating from actual workflow configuration and executed event context.",
+    "Report unavailable runners, authentication, divergence or failures honestly with actor/action evidence; never infer Linux success from configuration.",
+    "Use only sanitized results; keep raw logs, stores, caches and build output untracked and retain Q001 packaging gate."
+  ],
+  "non_goals": [
+    "Modifying workflows or product code in this evidence-only slice; hiding failed jobs or changing runner policy."
+  ],
+  "read_first": [
+    "02_analysis/CONTEXT.md",
+    "00_brief/decisions.md",
+    "02_analysis/ci-plan.md",
+    "docs/ci.md",
+    ".github/workflows/ci.yml"
+  ],
+  "allowed_prefixes": [
+    "02_analysis/ci-qualification.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/ci_contract_check.py"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}

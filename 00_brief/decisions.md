@@ -321,3 +321,23 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   credential access or privileged fork execution. Source/tests/locks/evidence stay
   tracked; artifacts are limited to privacy-safe summaries. Q001 remains open.
 - Supersedes: none; implements D014's selected CI policy.
+
+## D019 — Bootstrap missing Rust tooling only inside CI job storage
+
+- Status: accepted
+- Date: 2026-10-25
+- Evidence: actual run 40209605799 on d24d064 passed hosted Windows and reached
+  five distinct fresh Linux runners. Linux provisioning failed because rustup
+  was absent (exit 127); see ../02_analysis/ci-qualification.md. This is a CI
+  environment prerequisite defect, not an observed product failure.
+- Decision: Admit M004-S03 before resuming blocked S02. Use an official,
+  version-pinned Rustup bootstrap with a verified pinned digest, installed only
+  into the existing job-owned RUSTUP_HOME/CARGO_HOME. Do not modify shell profiles,
+  global defaults, services or host credentials. Provision pinned Rust 1.99.1,
+  then run the existing locked/offline stages. Validate installer trust and job
+  path isolation before execution; preserve the existing fork/permission gates.
+- Evidence order: focused checks and local full verification, independent
+  correction review, commit/push, then resolve S02 with the new actual-run
+  evidence. The S02 envelope and failed-run history remain unchanged. No Linux
+  success is inferred before observed checks pass.
+- Supersedes: S01's assumption that rustup already exists on fresh Linux runners.
