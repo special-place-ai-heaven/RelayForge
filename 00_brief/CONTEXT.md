@@ -11,3 +11,7 @@ For a bounded coder/reviewer task, read only the files named by its generated pr
 Plan and write boundaries belong to ../roadmap.yaml. Execution history belongs
 to ../05_governance/ledger.jsonl. Research belongs to ../02_analysis/.
 Do not duplicate live slice state here.
+
+Dated pause handover: [delivery-handover-2026-10-25.md](delivery-handover-2026-10-25.md)
+summarizes completed work, issue dispositions, evidence and remaining release gaps.
+Read actual ledger/Git state before resuming; the handover is not new admission.

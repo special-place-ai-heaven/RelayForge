@@ -360,3 +360,21 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   Review and push the correction, then resume frozen S02 only with actual run
   evidence. Preserve both failed Linux runs and their successful Windows results.
 - Supersedes: reliance on inherited compiler-wrapper settings in CI jobs only.
+
+## D021 — Pause delivery after the reviewed checkpoint and hand over
+
+- Status: accepted
+- Date: 2026-10-25
+- Authority: the owner requested, "Pause after this checkpoint, commit and push,"
+  followed by a report of successful work, encountered issues, resolved and
+  unresolved items, remaining work and gaps for a fresh-context agent.
+- Decision: complete the current M006 repair checkpoint and required reviews,
+  commit and push without force, save the evidence-linked delivery handover,
+  then pause the active campaign. Do not admit or start another implementation
+  slice until the owner resumes it.
+- Bounds: this pause does not complete G1-G6, waive Q001, authorize packaging,
+  accept a native identity/adoption policy, or grant a paid experiment budget.
+  Preserve accepted evidence and the unrelated sibling checkout. Continue using
+  the verified owner Git identity without AI co-author trailers.
+- Handover: delivery-handover-2026-10-25.md records the dated evidence and next
+  actions; the roadmap and ledger remain authoritative for execution state.
