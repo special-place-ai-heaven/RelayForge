@@ -15,6 +15,7 @@ Accepted decisions belong in `../00_brief/decisions.md`; admitted work belongs i
 | Source-level investigation of Ten Levels of JEV: Pi hooks, cheap reads, file fanout, compaction, dynamic questions, and accounting limits | Relevant sections of [ten-levels-jev-source-review-2026-10-25.md](ten-levels-jev-source-review-2026-10-25.md) |
 | Article review: typed session handoffs, deterministic extraction, evidence retention, and continuation-quality evaluation | [session-handoff-source-review-2026-10-25.md](session-handoff-source-review-2026-10-25.md) |
 | Article review: inventory-derived triage candidates, label leakage, skewed evaluations, and readiness versus worker suitability | [issue-triage-source-review-2026-10-25.md](issue-triage-source-review-2026-10-25.md) |
+| Seven cloned repository source reviews: routing proxies, shadow/effective identity, supervision, compaction, evidence funnels, local logits and batched ranking | Relevant sections of [jev-repository-roundup-2026-10-25.md](jev-repository-roundup-2026-10-25.md) |
 
 The imported research is dated 2026-10-25 and is not proof of a current runtime.
 RelayForge has no implemented product yet. The non-Python language and storage

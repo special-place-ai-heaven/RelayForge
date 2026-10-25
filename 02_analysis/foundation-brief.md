@@ -103,6 +103,12 @@ category, readiness, difficulty and worker suitability. Good category prediction
 does not validate readiness or model/effort success. Retain input coverage and
 rubric provenance; evaluate each signal against independent outcomes and baselines.
 
+The [seven-repository source review](jev-repository-roundup-2026-10-25.md) adds
+route-adoption stages (suggested/applied/sent/confirmed), continuation pinning,
+persist-before-dispatch and verify-before-complete ordering, and stable evidence
+handles. Preserve unknown usage instead of zero defaults. Its small replay examples
+do not validate a general adaptive router; compare fixed reasonable baselines.
+
 ## Foundation slice output
 
 Specify the minimum contracts and compare at most two non-Python toolchain
