@@ -59,6 +59,30 @@ Both harnesses need verified event coverage, actual execution receipts, and
 outcome attribution. Calibration, savings, cost accounting, allowed native
 bindings, foreground mapping, and promotion thresholds remain unresolved.
 
+## Additional research considerations
+
+The [registry source review](registry-source-review-2026-10-25.md) separates
+observed coding-agent PR outcomes from proposed JEV integrations. Consider these
+details when defining the existing contracts; they do not admit new features:
+
+- Separate technical verification, task acceptance, and PR integration outcomes.
+  Abandonment, duplicates, interruption, and unwanted work are not automatically
+  model reasoning failures. Keep full attempt/recovery history and denominators.
+- Version JEV questions, criteria, candidate count/order, resolved model,
+  thresholds, and calibration together. Provider Choice confidence depends on
+  candidate count and is not an observed task-completion probability.
+- Batch independent semantic questions over shared minimized state when useful;
+  compute counts, prices, freshness, and failure rates in code. Do not make an
+  extra model call for every observed event.
+- Record relevant instruction/skill/tool/context configuration and actual
+  recommendation adoption. A right suggestion does not ensure a right tool load.
+- Any later semantic tool gate operates within existing deterministic permissions.
+  Denied/deferred calls also belong in the cost/failure record. A generic MCP
+  connection or prompt hint does not prove native call interception.
+
+Read the detailed review only for those questions. The first slice remains the
+bounded foundation contract; routing, gates, and skill selection are unimplemented.
+
 ## Foundation slice output
 
 Specify the minimum contracts and compare at most two non-Python toolchain
