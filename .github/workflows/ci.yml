@@ -54,7 +54,7 @@ jobs:
       (github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)))
-    runs-on: [self-hosted, linux, fresh]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       RUSTC_WRAPPER: ""
