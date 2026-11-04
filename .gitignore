@@ -87,5 +87,7 @@ desktop.ini
 
 # Local code-intelligence index; indexing must not dirty a slice baseline.
 /.symforge/
-.supervisor/
-.claude/autoharness/
+
+# Local agent session state; rewritten on every tool call and must not dirty a slice baseline.
+/.supervisor/
+/.claude/autoharness/

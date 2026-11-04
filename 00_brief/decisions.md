@@ -403,15 +403,17 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
 - Status: accepted
 - Date: 2026-11-04
 - Authority: the owner's instruction "go on slice 1" and D009/D010, which delegate
-  routine technical decisions to the architect. Reviewed with the advisor.
+  routine technical decisions to the architect. Reviewed with the advisor. This
+  resumes the work paused by D021; the first G4 slice is to be admitted as M007-S01.
 - Decision: native Codex and Claude startup metadata supplies a configured model
   id and effort, not a backend revision. The strict identity rule therefore makes
   every native profile ineligible (`unknown_execution_identity` in the eligibility
   evaluator). Split the two gates:
   1. Eligibility may relax, for advisory routing only. A profile whose execution
      identity is unverified may become a candidate, but the result must carry an
-     explicit identity-status field (unverified or verified). It is never equal to
-     a verified candidate.
+     explicit identity-status field (unverified or verified). An unverified
+     candidate is always labelled unverified and ranks below any verified
+     candidate for the same request.
   2. Comparison and accounting stay strict. The selected-version check against the
      profile's resolved version and the exclusion of any cohort with an unknown
      observed identity are unchanged. An unknown execution identity never supports
@@ -420,9 +422,17 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
      `--model` option. A later slice must add it.
   4. Unchanged rules: configured-only required capabilities still cannot qualify,
      and a resolved model id and version are both present or both absent. No
-     configured value is ever copied into a resolved field.
+     configured value may be copied into a resolved field; the adapter slice must
+     add a test for this. Strict comparison currently reports an unverified
+     profile as context_first_selection_mismatch; that slice must report an
+     identity-specific reason instead.
 - Bounds: this decision changes no code. Implementation belongs to the first
   admitted G4 adapter slice, with a failing-first test for each rule above. It does
   not complete G4, accept an adapter smoke, or allow any claim that advice was
   applied. If a genuine per-turn execution receipt source appears, a superseding
   decision may tighten this.
+- Evidence: delivery-handover-2026-10-25.md (native adapter findings and release
+  gaps); the eligibility evaluator in 08_pkg/relayforge-core/src/lib.rs
+  (unknown_execution_identity, paired resolved fields, configured-only
+  capabilities) and the comparison checks in accounting.rs (selected version and
+  unknown observed identity), as read at commit 0bf90b7.
