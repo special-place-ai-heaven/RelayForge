@@ -87,3 +87,5 @@ desktop.ini
 
 # Local code-intelligence index; indexing must not dirty a slice baseline.
 /.symforge/
+.supervisor/
+.claude/autoharness/
