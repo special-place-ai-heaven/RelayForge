@@ -80,7 +80,7 @@ def validate(workflow: dict) -> None:
     for name, job in jobs.items():
         require(job.get("env") == expected_wrappers, f"{name} must clear inherited Rust compiler wrappers")
     require(windows.get("runs-on") == "windows-latest" and "if" not in windows, "fork PRs need hosted Windows verification")
-    require(linux.get("runs-on") == ["self-hosted", "linux", "fresh"], "custom runner labels changed")
+    require(linux.get("runs-on") == "ubuntu-latest", "Linux job must stay on GitHub-hosted ubuntu-latest")
     require(" ".join(str(linux.get("if", "")).split()) == LINUX_GATE, "custom runner trust gate changed")
     require(linux.get("strategy") == {
         "fail-fast": "false",
@@ -149,7 +149,8 @@ def negative_fixtures(workflow: dict) -> int:
     mutations = [
         ("fork trigger", lambda w: w["on"].update({"pull_request_target": {}})),
         ("write token", lambda w: w["permissions"].update({"contents": "write"})),
-        ("custom runner labels", lambda w: w["jobs"]["linux"].update({"runs-on": ["self-hosted", "linux"]})),
+        ("self-hosted runner labels", lambda w: w["jobs"]["linux"].update({"runs-on": ["self-hosted", "linux", "fresh"]})),
+        ("bare self-hosted label", lambda w: w["jobs"]["linux"].update({"runs-on": "self-hosted"})),
         ("fork trust gate", lambda w: w["jobs"]["linux"].pop("if")),
         ("copied fork push", lambda w: w["jobs"]["linux"].update({"if": LINUX_GATE.split(" && ", 1)[1]})),
         ("author association", lambda w: w["jobs"]["linux"].update({"if": "github.event_name == 'pull_request'"})),

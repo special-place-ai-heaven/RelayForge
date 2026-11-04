@@ -2,15 +2,18 @@
 
 The workflow in `.github/workflows/ci.yml` runs the maintained clean-candidate
 full verifier on GitHub-hosted `windows-latest`. It also runs five separate
-product stages (`fmt`, `clippy`, `unit`, `integration`, `doc`) on runners
-labeled `[self-hosted, linux, fresh]`, with at most five parallel matrix jobs.
+product stages (`fmt`, `clippy`, `unit`, `integration`, `doc`) on GitHub-hosted
+`ubuntu-latest`, with at most five parallel matrix jobs. The Linux stages moved
+off the shared self-hosted `fresh` pool on 2026-10-26 (C3): this repository is
+public, and that pool also runs private repositories' CI.
 Each stage uses the host's native Rust target and locked, offline dependencies.
 The integration stage builds the actual CLI and gives its executable path to the
 fresh-process tests. Discovery and execution must both contain nonzero tests;
 required tests cannot be absent, ignored, skipped or failed.
 
-The custom-runner job is limited to the canonical repository's pushes and
-same-repository pull requests authored by an OWNER, MEMBER or COLLABORATOR.
+The Linux job is still limited to the canonical repository's pushes and
+same-repository pull requests authored by an OWNER, MEMBER or COLLABORATOR,
+and `scripts/ci_contract_check.py` now rejects any self-hosted label on it.
 Public fork pull requests still receive the hosted Windows check. The workflow
 uses a read-only contents token, credential-free full-history checkout, pinned
 action commits and job timeouts. This gate limits who can submit code to the
