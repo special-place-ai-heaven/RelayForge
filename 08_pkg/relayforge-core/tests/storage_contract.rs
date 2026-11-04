@@ -1229,6 +1229,10 @@ fn actual_cli_fresh_processes_inventory_import_show_and_binding_diagnostics() {
         diagnostic["candidates"][0]["reasons"][0],
         "missing_current_state"
     );
+    assert!(matches!(
+        diagnostic["candidates"][0]["identity_status"].as_str(),
+        Some("verified" | "unverified")
+    ));
 }
 
 #[test]

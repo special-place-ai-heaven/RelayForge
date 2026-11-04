@@ -408,11 +408,23 @@ pub struct CurrentState {
     pub workspace_dirty: bool,
 }
 
+/// Whether a profile's resolved model id and version are both known (D023).
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IdentityStatus {
+    Verified,
+    /// Also the default for results serialised before this field existed.
+    #[default]
+    Unverified,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CandidateEligibility {
     pub profile_id: String,
     pub eligible: bool,
+    #[serde(default)]
+    pub identity_status: IdentityStatus,
     pub reasons: Vec<String>,
     pub evidence: Vec<String>,
 }
@@ -1051,6 +1063,7 @@ pub fn evaluate_eligibility(
             candidates.push(CandidateEligibility {
                 profile_id: id,
                 eligible: false,
+                identity_status: IdentityStatus::Unverified,
                 reasons: vec![
                     if selected_unknown {
                         "unknown_selected_profile"
@@ -1063,6 +1076,12 @@ pub fn evaluate_eligibility(
             });
             continue;
         };
+        let identity_status =
+            if profile.resolved_model_id.is_some() && profile.resolved_model_version.is_some() {
+                IdentityStatus::Verified
+            } else {
+                IdentityStatus::Unverified
+            };
         let mut reasons = Vec::new();
         let mut evidence = Vec::new();
         let Some(state) = current else {
@@ -1070,6 +1089,7 @@ pub fn evaluate_eligibility(
             candidates.push(CandidateEligibility {
                 profile_id: id,
                 eligible: false,
+                identity_status,
                 reasons,
                 evidence,
             });
@@ -1111,9 +1131,6 @@ pub fn evaluate_eligibility(
             reasons.push("workspace_dirty".into());
         } else if state.workspace_fingerprint != snapshot.workspace_fingerprint {
             reasons.push("workspace_mismatch".into());
-        }
-        if profile.resolved_model_id.is_none() || profile.resolved_model_version.is_none() {
-            reasons.push("unknown_execution_identity".into());
         }
         if !profile.supported_efforts.contains(&profile.effort) {
             reasons.push("unsupported_effort".into());
@@ -1175,14 +1192,20 @@ pub fn evaluate_eligibility(
         evidence.dedup();
         candidates.push(CandidateEligibility {
             eligible: reasons.is_empty(),
+            identity_status,
             profile_id: id,
             reasons,
             evidence,
         });
     }
-    let eligible_profile_ids: Vec<_> = candidates
-        .iter()
-        .filter(|c| c.eligible)
+    // Verified candidates rank first; each group stays in profile-id order (candidates is sorted).
+    let eligible_profile_ids: Vec<_> = [IdentityStatus::Verified, IdentityStatus::Unverified]
+        .into_iter()
+        .flat_map(|status| {
+            candidates
+                .iter()
+                .filter(move |c| c.eligible && c.identity_status == status)
+        })
         .map(|c| c.profile_id.clone())
         .collect();
     let outcome = if eligible_profile_ids.is_empty() {
@@ -1953,6 +1976,69 @@ mod tests {
         let result = evaluate_eligibility(&snapshot, &request, Some(&sample_current())).unwrap();
         assert_eq!(result.eligible_profile_ids, vec!["profile-a"]);
         assert_eq!(result.candidates[0].evidence, vec!["evidence/cap-a"]);
+    }
+
+    #[test]
+    fn unverified_identity_is_a_labelled_candidate_ranked_below_verified() {
+        let mut snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        let mut verified = snapshot.profiles[0].clone();
+        verified.profile_id = "profile-z".into();
+        verified.revision = "profile-rev-z".into();
+        verified.capabilities[0].profile_revision = "profile-rev-z".into();
+        snapshot.profiles[0].resolved_model_id = None;
+        snapshot.profiles[0].resolved_model_version = None;
+        snapshot.profiles.push(verified);
+        let mut request = sample_request();
+        request.candidate_profile_ids.push("profile-z".into());
+        let result = evaluate_eligibility(&snapshot, &request, Some(&sample_current())).unwrap();
+        assert_eq!(
+            result.candidates[0].identity_status,
+            IdentityStatus::Unverified
+        );
+        assert!(result.candidates[0].eligible);
+        assert!(result.candidates[0].reasons.is_empty());
+        assert_eq!(
+            result.candidates[1].identity_status,
+            IdentityStatus::Verified
+        );
+        assert_eq!(result.eligible_profile_ids, vec!["profile-z", "profile-a"]);
+
+        // Every other check still applies to an unverified profile.
+        let mut configured = sample_snapshot(CapabilityStatus::Configured);
+        configured.profiles[0].resolved_model_id = None;
+        configured.profiles[0].resolved_model_version = None;
+        let result =
+            evaluate_eligibility(&configured, &sample_request(), Some(&sample_current())).unwrap();
+        assert!(!result.candidates[0].eligible);
+        assert_eq!(
+            result.candidates[0].reasons,
+            vec!["unresolved_configured_only"]
+        );
+        assert_eq!(
+            result.candidates[0].identity_status,
+            IdentityStatus::Unverified
+        );
+    }
+
+    #[test]
+    fn configured_values_are_never_copied_into_resolved_identity() {
+        let mut snapshot = sample_snapshot(CapabilityStatus::RuntimeConfirmed);
+        snapshot.profiles[0].resolved_model_id = None;
+        snapshot.profiles[0].resolved_model_version = None;
+        let before = snapshot.clone();
+        evaluate_eligibility(&snapshot, &sample_request(), Some(&sample_current())).unwrap();
+        assert_eq!(snapshot, before);
+        let mut store = Store::memory().unwrap();
+        store.import_inventory(snapshot).unwrap();
+        let stored = store.inventory("snap-a").unwrap();
+        assert_eq!(stored.profiles[0].resolved_model_id, None);
+        assert_eq!(stored.profiles[0].resolved_model_version, None);
+        let mut half = before.clone();
+        half.profiles[0].resolved_model_id = Some("model-a".into());
+        assert!(validate_snapshot(&half).is_err());
+        half.profiles[0].resolved_model_id = None;
+        half.profiles[0].resolved_model_version = Some("version-a".into());
+        assert!(validate_snapshot(&half).is_err());
     }
 
     #[test]

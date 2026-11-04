@@ -620,6 +620,9 @@ fn context_reason(
     if snapshot.policy_version != context.policy_version {
         return Ok(Some("context_policy_mismatch".into()));
     }
+    if profile.resolved_model_id.is_none() || profile.resolved_model_version.is_none() {
+        return Ok(Some("unknown_execution_identity".into()));
+    }
     let Some(first) = work.values().min_by_key(|attempt| attempt.first_sequence) else {
         return Ok(Some("context_without_attempt".into()));
     };
@@ -1116,7 +1119,13 @@ fn compare_outcomes(
     validate_comparison_request(request)?;
     let snapshot = store.inventory(&request.eligibility.snapshot_id)?;
     let eligibility = evaluate_eligibility(&snapshot, &request.eligibility, current)?;
-    let eligible_profile_ids = eligibility.eligible_profile_ids.clone();
+    // D023: advisory-eligible unverified profiles never enter comparison.
+    let eligible_profile_ids: Vec<String> = eligibility
+        .candidates
+        .iter()
+        .filter(|c| c.eligible && c.identity_status == crate::IdentityStatus::Verified)
+        .map(|c| c.profile_id.clone())
+        .collect();
     let binding = if current.is_some() {
         "available"
     } else {
@@ -2263,6 +2272,69 @@ mod tests {
                 "mismatch: {field}"
             );
         }
+    }
+
+    #[test]
+    fn unverified_profile_reports_identity_reason_not_selection_mismatch() {
+        let mut unverified = snapshot();
+        unverified.snapshot_id = "snapshot-unverified".into();
+        for profile in &mut unverified.profiles {
+            profile.resolved_model_id = None;
+            profile.resolved_model_version = None;
+        }
+        let mut store = base_store();
+        store.import_inventory(unverified).unwrap();
+        create_task_on_snapshot(
+            &mut store,
+            "native-task",
+            "baseline",
+            "2026-10-25T10:00:00Z",
+            labels(),
+            "snapshot-unverified",
+        );
+        record(
+            &mut store,
+            "intent-native",
+            &["task-create-native-task"],
+            EventKind::AttemptIntent {
+                session_id: "session-a".into(),
+                task_id: "native-task".into(),
+                attempt_id: "attempt-native".into(),
+                predecessor_attempt_id: None,
+                span_id: "span-native".into(),
+                span_role: SpanRole::Worker,
+                selected: SelectedIdentity {
+                    profile: "baseline".into(),
+                    model: "baseline-alias".into(),
+                    model_version: "baseline-alias".into(),
+                    effort: "high".into(),
+                },
+            },
+        );
+        let report = store
+            .accounting_report(&AccountingRequest {
+                schema_version: 1,
+                task_id: None,
+            })
+            .unwrap();
+        let task = report
+            .tasks
+            .iter()
+            .find(|task| task.task_id == "native-task")
+            .unwrap();
+        assert_eq!(
+            task.context_reason.as_deref(),
+            Some("unknown_execution_identity")
+        );
+
+        // Comparison stays strict: an unverified profile is advisory-eligible but never compared.
+        let mut request = compare_request(None);
+        request.eligibility.snapshot_id = "snapshot-unverified".into();
+        let mut current = current_state();
+        current.expected_snapshot_id = "snapshot-unverified".into();
+        let report = store.compare_outcomes(&request, Some(&current)).unwrap();
+        assert!(report.eligible_profile_ids.is_empty());
+        assert_eq!(report.outcome, "no_eligible_candidate");
     }
 
     #[test]
