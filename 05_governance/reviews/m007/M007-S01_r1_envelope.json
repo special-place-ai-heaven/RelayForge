@@ -1,0 +1,60 @@
+{
+  "schema": "frutlups.envelope/2",
+  "slice": "M007-S01",
+  "round": 1,
+  "title": "Implement the D023 advisory identity boundary in the core",
+  "objective": "Let eligibility return labelled unverified candidates for advisory routing while comparison and accounting stay strict.",
+  "acceptance": [
+    "Implement the S01 section of 02_analysis/native-adapter-plan.md and decision D023, writing each failing test first.",
+    "An unverified candidate carries an explicit identity status, ranks below verified candidates and appears only when every other eligibility check passes.",
+    "Keep configured-only exclusion and the paired resolved id and version rule; add a test that no configured value is copied into a resolved field.",
+    "Comparison and accounting remain strict; an unverified profile reports an identity-specific reason, not context_first_selection_mismatch.",
+    "Show the identity status in CLI eligibility output; preserve existing databases, event schemas and tests; pass focused and full checks."
+  ],
+  "non_goals": [
+    "Adapters, process spawning, adoption recording, dispatch, new dependencies, statistics changes or packaging."
+  ],
+  "read_first": [
+    "08_pkg/CONTEXT.md",
+    "07_app/CONTEXT.md",
+    "02_analysis/CONTEXT.md",
+    "02_analysis/native-adapter-plan.md",
+    "02_analysis/inventory-plan.md",
+    "00_brief/decisions.md"
+  ],
+  "allowed_prefixes": [
+    "08_pkg/relayforge-core/",
+    "07_app/relayforge-cli/",
+    "scripts/product_verify.py",
+    "02_analysis/identity-results.md"
+  ],
+  "forbidden": [
+    "00_brief/",
+    "05_governance/",
+    "prompts/",
+    "questions/answered/",
+    "roadmap.yaml",
+    "frutlups.toml",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "focused": [
+    [
+      "python",
+      "-B",
+      "scripts/product_verify.py",
+      "--focused"
+    ]
+  ],
+  "full": [
+    "python",
+    "-B",
+    "scripts/hermetic_verification.py"
+  ],
+  "runtime": {},
+  "timeout_seconds": 900,
+  "observation": "process",
+  "notes": "",
+  "findings": "",
+  "memory": ""
+}
