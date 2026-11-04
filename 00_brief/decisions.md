@@ -397,3 +397,32 @@ changes; do not rewrite accepted history. Roadmap owns plan; ledger owns executi
   are preserved and the final main push and checks are verified.
 - Evidence: landing-preservation-2026-10-25.md records the Git and recovery
   identifiers, draft comparison, CI observation and remaining cleanup gates.
+
+## D023 — Separate advisory eligibility from execution-identity comparison
+
+- Status: accepted
+- Date: 2026-11-04
+- Authority: the owner's instruction "go on slice 1" and D009/D010, which delegate
+  routine technical decisions to the architect. Reviewed with the advisor.
+- Decision: native Codex and Claude startup metadata supplies a configured model
+  id and effort, not a backend revision. The strict identity rule therefore makes
+  every native profile ineligible (`unknown_execution_identity` in the eligibility
+  evaluator). Split the two gates:
+  1. Eligibility may relax, for advisory routing only. A profile whose execution
+     identity is unverified may become a candidate, but the result must carry an
+     explicit identity-status field (unverified or verified). It is never equal to
+     a verified candidate.
+  2. Comparison and accounting stay strict. The selected-version check against the
+     profile's resolved version and the exclusion of any cohort with an unknown
+     observed identity are unchanged. An unknown execution identity never supports
+     a performance win or enters a ranking cohort.
+  3. Adoption is a recorded store event. It is never inferred from a typed
+     `--model` option. A later slice must add it.
+  4. Unchanged rules: configured-only required capabilities still cannot qualify,
+     and a resolved model id and version are both present or both absent. No
+     configured value is ever copied into a resolved field.
+- Bounds: this decision changes no code. Implementation belongs to the first
+  admitted G4 adapter slice, with a failing-first test for each rule above. It does
+  not complete G4, accept an adapter smoke, or allow any claim that advice was
+  applied. If a genuine per-turn execution receipt source appears, a superseding
+  decision may tighten this.
