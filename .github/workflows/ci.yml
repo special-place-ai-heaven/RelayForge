@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   windows:
-    runs-on: windows-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'ci-hosted'))) && fromJSON('["self-hosted","Windows","X64","windows-host-interim"]') || 'windows-latest' }}
     timeout-minutes: 30
     env:
       RUSTC_WRAPPER: ""
@@ -54,7 +54,7 @@ jobs:
       (github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association)))
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && !contains(github.event.pull_request.labels.*.name, 'ci-hosted'))) && fromJSON('["self-hosted","Linux","X64","fresh","light"]') || 'ubuntu-latest' }}
     timeout-minutes: 20
     env:
       RUSTC_WRAPPER: ""
